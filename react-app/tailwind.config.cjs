@@ -4,12 +4,11 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        gmarket: ["GmarketSans", "sans-serif"], // G마켓 산스 추가
+        // 전체 기본 폰트로 gmarket 사용 가능
+        sans: ["GmarketSans", "sans-serif"], // Tailwind의 기본 sans를 오버라이드
+        gmarket: ["GmarketSans", "sans-serif"], // 필요시 font-gmarket으로도 사용 가능
       },
       colors: {
-        amber: {
-          200: "#FCD34D", // 연한 갈색
-        },
       },
     },
   },
