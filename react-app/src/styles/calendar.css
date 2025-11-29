@@ -1,0 +1,16 @@
+/* src/styles/calendar.css */
+
+/* 화살표 색상 */
+.my-calendar .rdp-chevron {
+  fill: black !important;
+}
+.my-calendar .rdp-nav-button:hover .rdp-chevron {
+  fill: gray !important;
+}
+
+/* 전체 달력 스케일 키우기 */
+.my-calendar {
+  transform: scale(1.2);   /* 달력 전체 1.5배 확대 */
+  transform-origin: top left; /* 위치 고정 */
+}
+
