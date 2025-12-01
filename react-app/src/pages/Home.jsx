@@ -1,13 +1,17 @@
 import React, { useState } from "react";
-import Banner from "../assets/images/Banner.png";
-import toadImg from "../assets/images/toad.jpg";
-import pinokioImg from "../assets/images/pinokio.png";
-import reverbImg from "../assets/images/reverb.png";
-import goallthewayImg from "../assets/images/goalltheway.jpg";
-import luciddreamImg from "../assets/images/luciddream.jpg";
-import apartmentImg from "../assets/images/apartment.jpg";
-import { useNavigate } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
+import { useNavigate } from "react-router-dom";
+import {
+  toadImg,
+  pinokioImg,
+  reverbImg,
+  goallthewayImg,
+  luciddreamImg,
+  apartmentImg,
+  Banner,
+  mainrogo
+} from "../assets/images/common";
+
 
 const themes = [
   { id: 1, title: "두껍아 두껍아 헌집줄께 새집다오", imageUrl: toadImg, description: "두꺼비 설명", genre: "코미디, 모험", playTime: "60분", difficulty: "중간" },
@@ -107,12 +111,12 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40" />
 
         {/* 메뉴 버튼 */}
-        <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className={`transition-all shadow-xl duration-300 py-[13px] px-5 bg-white rounded-lg shadow-md flex items-center justify-start space-x-3 max-w-[1400px] w-full
-              ${menuOpen ? 'ml-[350px]' : 'ml-0'}`} // 메뉴 열리면 오른쪽으로 이동
-          >
+          <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 ">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
+                ${menuOpen ? 'ml-[350px]' : 'ml-0'}`}
+            >
             <svg
               className="w-12 h-12 text-gray-900"
               fill="none"
@@ -171,14 +175,16 @@ export default function Home() {
       </section>
 
       {/* 소개 */}
-      <section className="bg-gray-50 px-8 py-16 text-gray-800">
-        <h3 className="text-3xl font-bold mb-6">무비무드 소개</h3>
-        <p className="max-w-3xl mb-4">Keystone Cape의 무비무드는 단순한 방탈출 그 이상의 경험입니다.</p>
-        <p className="max-w-3xl">각 테마는 고유의 스토리를 가지고 있고, 당신은 그 안에서 주인공이 됩니다.</p>
+      <section className="bg-white px-8 py-16">
+        <img src={mainrogo} alt="무비무드 로고" className="h-[400px] w-auto -ml-[55px]" />
+        <hr className="border-t-2 border-gray-300 mb-6 -mt-[70px]" />
+        <div className="text-[24px] mt-[50px]">
+          <p className="font-bold mb-2 mb-[20px]">상호: KEYSTONE CAPE</p>
+          <p className="font-bold mb-2 mb-[20px]">주소: 서울특별시 강남구 76-22 4층</p>
+          <p className="font-bold mb-2 mb-[20px]">Email: show@keystone.cape</p>
+          <p className="font-bold">© 2025 Keystone Cape | All Rights Reserved</p>
+        </div>
       </section>
-
-      {/* Footer */}
-      <footer className="text-center py-8 text-black text-sm border-t">© 2025 Keystone Cape | All Rights Reserved</footer>
     </div>
   );
 }

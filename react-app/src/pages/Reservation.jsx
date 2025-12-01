@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar } from "../components/ui/Calendar";
-import toadImg from "../assets/images/toad.jpg";
-import pinokioImg from "../assets/images/pinokio.png";
-import reverbImg from "../assets/images/reverb.png";
-import goallthewayImg from "../assets/images/goalltheway.jpg";
-import luciddreamImg from "../assets/images/luciddream.jpg";
-import apartmentImg from "../assets/images/apartment.jpg";
+import {
+  toadImg,
+  pinokioImg,
+  reverbImg,
+  goallthewayImg,
+  luciddreamImg,
+  apartmentImg,
+  Banner,
+  mainrogo
+} from "../assets/images/common";
 import Menubar from "../components/ui/Menubar";
 
 export default function ReservationPage() {
@@ -44,10 +48,10 @@ export default function ReservationPage() {
     <div className="relative min-h-screen">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 ">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-md flex items-center justify-start space-x-3 max-w-[1400px] w-full
+          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
             ${menuOpen ? 'ml-[350px]' : 'ml-0'}`}
         >
           <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
@@ -55,7 +59,7 @@ export default function ReservationPage() {
       </header>
 
       <div className={`min-h-screen flex justify-center transition-all duration-300 ${menuOpen ? 'ml-[350px]' : 'ml-0'}`}>
-        <div className="bg-white w-full max-w-[1400px] rounded-xl shadow-2xl p-5 flex gap-6 mt-[150px]">
+        <div className="bg-white w-full max-w-[1400px] rounded-xl shadow-all-xl p-5 flex gap-6 mt-[150px]">
 
           {/* 왼쪽 박스: 테마 이미지 + 제목 + 설명 */}
           <div className="w-[55%] flex flex-col items-center">
