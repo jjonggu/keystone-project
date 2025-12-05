@@ -1,3 +1,4 @@
+// Home.tsx
 import React, { useState } from "react";
 import Menubar from "../components/ui/Menubar";
 import { useNavigate } from "react-router-dom";
@@ -12,8 +13,17 @@ import {
   mainrogo
 } from "../assets/images/common";
 
+interface Theme {
+  id: number;
+  title: string;
+  imageUrl: string;
+  description: string;
+  genre: string;
+  playTime: string;
+  difficulty: string;
+}
 
-const themes = [
+const themes: Theme[] = [
   { id: 1, title: "두껍아 두껍아 헌집줄께 새집다오", imageUrl: toadImg, description: "두꺼비 설명", genre: "코미디, 모험", playTime: "60분", difficulty: "중간" },
   { id: 2, title: "피노키오", imageUrl: pinokioImg, description: "피노키오 설명", genre: "판타지, 모험", playTime: "50분", difficulty: "쉬움" },
   { id: 3, title: "잔향", imageUrl: reverbImg, description: "잔향 설명", genre: "공포, 스릴러", playTime: "70분", difficulty: "어려움" },
@@ -22,8 +32,12 @@ const themes = [
   { id: 6, title: "201호 202호", imageUrl: apartmentImg, description: "201호 202호 설명", genre: "스릴러, 미스터리", playTime: "60분", difficulty: "어려움" }
 ];
 
-function DifficultyStars({ level }) {
-  let count;
+interface DifficultyStarsProps {
+  level: string;
+}
+
+function DifficultyStars({ level }: DifficultyStarsProps) {
+  let count: number;
   switch(level) {
     case "쉬움": count = 2; break;
     case "중간": count = 3; break;
@@ -39,8 +53,14 @@ function DifficultyStars({ level }) {
   );
 }
 
-// ThemeModal을 같은 파일 내에서 정의
-function ThemeModal({ open, onClose, theme, navigate }) {
+interface ThemeModalProps {
+  open: boolean;
+  onClose: () => void;
+  theme: Theme | null;
+  navigate: (path: string, options?: { state: { theme: Theme } }) => void;
+}
+
+function ThemeModal({ open, onClose, theme, navigate }: ThemeModalProps) {
   if (!open || !theme) return null;
 
   return (
@@ -81,16 +101,16 @@ function ThemeModal({ open, onClose, theme, navigate }) {
 
 export default function Home() {
   const navigate = useNavigate();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   const scrollToThemes = () => {
     const section = document.getElementById("themes");
     section?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const openModal = (theme) => {
+  const openModal = (theme: Theme) => {
     setSelectedTheme(theme);
     setModalOpen(true);
   };
@@ -111,17 +131,17 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40" />
 
         {/* 메뉴 버튼 */}
-          <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 ">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
-                ${menuOpen ? 'ml-[350px]' : 'ml-0'}`}
-            >
+        <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 ">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
+              ${menuOpen ? 'ml-[350px]' : 'ml-0'}`}
+          >
             <svg
               className="w-12 h-12 text-gray-900"
               fill="none"
               stroke="currentColor"
-              strokeWidth="3"
+              strokeWidth={3}
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -158,8 +178,8 @@ export default function Home() {
       <section id="themes" className="px-4 py-16 bg-white">
         <h3 className="text-3xl font-bold mb-12">테마 정보</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {themes.map((theme, idx) => (
-            <div key={idx} onClick={() => openModal(theme)} className="h-[700px] cursor-pointer rounded-lg overflow-hidden shadow-lg hover:shadow-3xl transition relative">
+          {themes.map((theme) => (
+            <div key={theme.id} onClick={() => openModal(theme)} className="h-[700px] cursor-pointer rounded-lg overflow-hidden shadow-lg hover:shadow-3xl transition relative">
               <img src={theme.imageUrl} alt={theme.title} className="w-full h-full object-cover" />
               <h2 className="absolute bottom-11 left-4 text-white text-xl font-black">{theme.title}</h2>
               <div className="absolute bottom-4 left-4 flex items-center">

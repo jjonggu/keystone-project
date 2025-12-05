@@ -1,15 +1,20 @@
+// Calendar.tsx
 import React, { useState } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { ko } from "date-fns/locale"; // 한국어 인스톨
 import "@styles/calendar.css";
 
-export function Calendar({ className = "" }) {
-  const allowedDates = [new Date(2025, 10, 29)];
-  const holidays = allowedDates;
-  const [selected, setSelected] = useState([]);
+interface CalendarProps {
+  className?: string;
+}
 
-  const isDisabled = (date) =>
+export function Calendar({ className = "" }: CalendarProps) {
+  const allowedDates: Date[] = [new Date(2025, 10, 29)]; // 11월 29일 (0-index)
+  const holidays: Date[] = allowedDates;
+  const [selected, setSelected] = useState<Date[]>([]);
+
+  const isDisabled = (date: Date) =>
     !allowedDates.some((d) => d.toDateString() === date.toDateString());
 
   return (
