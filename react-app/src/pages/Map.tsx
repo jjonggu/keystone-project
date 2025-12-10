@@ -80,7 +80,7 @@ export default function ReservationPage() {
             ${menuOpen ? "ml-[350px]" : "ml-0"}`}
         >
           <span className="text-4xl font-bold">☰</span>
-          <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
+          <span className="font-[1000] text-gray-900 text-4xl mb-1">MAP</span>
         </button>
       </header>
 

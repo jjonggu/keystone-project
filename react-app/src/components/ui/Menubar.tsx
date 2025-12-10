@@ -20,7 +20,7 @@ const Menubar: React.FC<MenubarProps> = ({ menuOpen, setMenuOpen }) => {
       <button onClick={() => setMenuOpen(false)} className="absolute top-4 right-4 text-gray-800 font-bold text-xl">✕</button>
 
       <nav className="flex flex-col space-y-4 text-[30px]">
-        <Link to="/themes" className="text-black font-extrabold hover:text-gray-600">About</Link>
+        <Link to="/about" className="text-black font-extrabold hover:text-gray-600">About</Link>
         <Link to="/reservations" className="text-black font-extrabold hover:text-gray-600">Reservation</Link>
         <Link to="/map" className="text-black font-extrabold hover:text-gray-600">Map</Link>
       </nav>
