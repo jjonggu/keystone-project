@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import markerImg from "@/assets/images/marker.png"; // 이미지 import
+import markerImg from "@/assets/images/marker.png";
 
 declare global {
   interface Window {
@@ -7,7 +7,12 @@ declare global {
   }
 }
 
-export default function KakaoMap() {
+interface KakaoMapProps {
+  lat: number;
+  lng: number;
+}
+
+export default function KakaoMap({ lat, lng }: KakaoMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -26,33 +31,27 @@ export default function KakaoMap() {
     };
 
     document.head.appendChild(script);
-  }, []);
+  }, [lat, lng]);
 
   const initMap = () => {
     if (!mapRef.current) return;
 
     const { kakao } = window;
 
-    const center = new kakao.maps.LatLng(37.507287, 127.028503);
+    const center = new kakao.maps.LatLng(lat, lng);
 
     const map = new kakao.maps.Map(mapRef.current, {
       center,
       level: 3,
     });
 
-    /** ⭐ 커진 마커 이미지 설정 (2배) */
-    const imageSrc = markerImg;
-    const imageSize = new kakao.maps.Size(100, 100); // ← 50 → 100 (2배)
+    const imageSize = new kakao.maps.Size(100, 100);
     const imageOption = {
-      offset: new kakao.maps.Point(50, 100), // 중심점도 2배로 조정
-      scaledSize: new kakao.maps.Size(100, 100), // 실제 화면에서 표시되는 크기
+      offset: new kakao.maps.Point(50, 100),
+      scaledSize: new kakao.maps.Size(100, 100),
     };
 
-    const markerImage = new kakao.maps.MarkerImage(
-      imageSrc,
-      imageSize,
-      imageOption
-    );
+    const markerImage = new kakao.maps.MarkerImage(markerImg, imageSize, imageOption);
 
     new kakao.maps.Marker({
       position: center,
