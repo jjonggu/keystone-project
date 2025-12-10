@@ -4,6 +4,7 @@ import com.keystonecape.entity.Theme;
 import com.keystonecape.service.ThemeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,4 +21,13 @@ public class ThemeController {
     public List<Theme> theme() {
         return themeService.themeList();
     }
+
+    @GetMapping("/themes/{id}")
+    public Theme getTheme(@PathVariable Long id) {
+        return themeService.themeList().stream()
+                .filter(theme -> theme.getThemeId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Theme not found"));
+    }
+
 }

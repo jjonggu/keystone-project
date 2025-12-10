@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,4 +43,10 @@ public class Theme {
 
     @Column(nullable = false)
     private Boolean isActive;
+
+    @Column(name = "theme_date", nullable = true)
+    private LocalDate themeDate;
+
+    @Column(name = "theme_time", nullable = true)
+    private LocalTime themeTime;
 }

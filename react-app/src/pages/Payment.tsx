@@ -1,37 +1,18 @@
-// ReservationPage.tsx
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+// src/pages/ReservationPage.tsx
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
-import {
-  toadImg,
-  pinokioImg,
-  reverbImg,
-  goallthewayImg,
-  luciddreamImg,
-  apartmentImg
-} from "../assets/images/common";
-
-interface ThemeData {
-  title: string;
-  imageUrl: string;
-  description: string;
-}
+import api from "../api"; // axios instance
+import type { Theme } from "../types/theme";
 
 export default function ReservationPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const themesData: ThemeData[] = [
-    { title: "두껍아 두껍아 헌집줄께 새집다오", imageUrl: toadImg, description: "두꺼비 테마 설명이 여기에 들어갑니다." },
-    { title: "피노키오", imageUrl: pinokioImg, description: "피노키오 테마 설명이 여기에 들어갑니다." },
-    { title: "잔향", imageUrl: reverbImg, description: "잔향 테마 설명이 여기에 들어갑니다." },
-    { title: "끝까지 간다", imageUrl: goallthewayImg, description: "끝까지 간다 테마 설명이 여기에 들어갑니다." },
-    { title: "루시드 드림", imageUrl: luciddreamImg, description: "루시드 드림 테마 설명이 여기에 들어갑니다." },
-    { title: "201호 202호", imageUrl: apartmentImg, description: "201호 202호 테마 설명이 여기에 들어갑니다." },
-  ];
-
-  const themeData: ThemeData | undefined = themesData[Number(id) - 1];
-
+  const [themeData, setThemeData] = useState<Theme | null>(
+    (location.state as any)?.theme || null
+  );
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [people, setPeople] = useState<string>("1");
   const [name, setName] = useState<string>("");
@@ -39,58 +20,95 @@ export default function ReservationPage() {
   const [contact2, setContact2] = useState<string>("");
   const [contact3, setContact3] = useState<string>("");
 
+  // 서버에서 테마 데이터 가져오기
+  useEffect(() => {
+    if (!themeData && id) {
+      api
+        .get<Theme>(`/themes/${id}`)
+        .then((res) => setThemeData(res.data))
+        .catch(() => setThemeData(null));
+    }
+  }, [id, themeData]);
+
   const handleNext = () => {
     if (!themeData) return;
 
     const fullContact = `${contact1}-${contact2}-${contact3}`;
+
+    if (!name || !contact1 || !contact2 || !contact3) {
+      alert("예약자 정보와 연락처를 모두 입력해주세요.");
+      return;
+    }
+
     navigate(`/reservation/${id}/payment`, {
       state: {
         themeData,
         people,
         name,
-        contact: fullContact
-      }
+        contact: fullContact,
+      },
     });
   };
 
   if (!themeData) {
-    return <div>잘못된 접근입니다.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl font-bold">
+        로딩 중이거나 잘못된 접근입니다.
+      </div>
+    );
   }
+
+  // 이미지 경로 처리
+  const imgSrc = themeData.imageUrl.startsWith("http")
+    ? themeData.imageUrl
+    : `http://localhost:8080/upload/${themeData.imageUrl.replace(
+        /^\/?upload\//,
+        ""
+      )}`;
 
   return (
     <div className="relative min-h-screen">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-        <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 ">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
-              ${menuOpen ? 'ml-[350px]' : 'ml-0'}`}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 ">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
+              ${menuOpen ? "ml-[350px]" : "ml-0"}`}
+        >
+          <svg
+            className="w-12 h-12 text-gray-900"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={3}
+            viewBox="0 0 24 24"
           >
-            <svg
-              className="w-12 h-12 text-gray-900"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={3}
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16"></path>
-            </svg>
-            <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
-          </button>
-        </header>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 5h16M4 12h16M4 19h16"
+            />
+          </svg>
+          <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
+        </button>
+      </header>
 
-      <div className={`min-h-screen flex flex-col items-center transition-all duration-300 ${menuOpen ? 'ml-[350px]' : 'ml-0'}`}>
+      <div
+        className={`min-h-screen flex flex-col items-center transition-all duration-300 ${
+          menuOpen ? "ml-[350px]" : "ml-0"
+        }`}
+      >
         <div className="bg-white w-full max-w-[1400px] rounded-xl shadow-all-xl p-5 flex gap-6 mt-[150px]">
-
           {/* 왼쪽 박스: 테마 이미지 */}
           <div className="w-[30%] flex flex-col items-center">
             <div className="w-full h-[600px] overflow-hidden rounded-lg shadow">
               <img
-                src={themeData.imageUrl}
-                alt={themeData.title}
+                src={imgSrc}
+                alt={themeData.themeName}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/no-image.png";
+                }}
               />
             </div>
           </div>
@@ -106,7 +124,9 @@ export default function ReservationPage() {
                 className="border rounded p-2.5 w-[4rem] focus:outline-none focus:ring-2 focus:ring-gray-400 shadow-lg"
               >
                 {[...Array(10)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>{i + 1}명</option>
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}명
+                  </option>
                 ))}
               </select>
             </div>
@@ -172,13 +192,13 @@ export default function ReservationPage() {
             {/* 7. 결제방법 */}
             <div className="flex items-center w-full">
               <span className="w-36 text-[25px] font-medium">결제방법</span>
-                <select
-                  className="border rounded p-1 -ml-5 text-[20px] w-40 text-center focus:outline-none focus:ring-2 focus:ring-gray-400 shadow-lg"
-                  defaultValue="선택"
-                >
-                  <option value="card">무통장입금</option>
-                  <option value="cash">카카오페이</option>
-                </select>
+              <select
+                className="border rounded p-1 -ml-5 text-[20px] w-40 text-center focus:outline-none focus:ring-2 focus:ring-gray-400 shadow-lg"
+                defaultValue="선택"
+              >
+                <option value="card">무통장입금</option>
+                <option value="cash">카카오페이</option>
+              </select>
             </div>
 
             {/* 예약하기 + 돌아가기 버튼 */}
@@ -202,11 +222,11 @@ export default function ReservationPage() {
         {/* 사진 아래 안내사항 박스 */}
         <div className="bg-gray-50 rounded-lg p-4 mt-6 shadow-all-xl border border-gray-200 w-full max-w-[1400px] mb-5">
           <h3 className="font-semibold text-[20px] mb-2">[ 안내사항 ]</h3>
-            <ul className="list-none list-inside text-[16px] text-gray-700 mt-2 space-y-2 ">
-              <li>- 예약 시간 10분 전까지 도착해주세요.</li>
-              <li>- 마스크 착용을 권장합니다.</li>
-              <li>- 모든 테마는 2인 기준으로 진행됩니다.</li>
-            </ul>
+          <ul className="list-none list-inside text-[16px] text-gray-700 mt-2 space-y-2 ">
+            <li>- 예약 시간 10분 전까지 도착해주세요.</li>
+            <li>- 마스크 착용을 권장합니다.</li>
+            <li>- 모든 테마는 2인 기준으로 진행됩니다.</li>
+          </ul>
         </div>
       </div>
     </div>

@@ -8,4 +8,6 @@ export interface Theme {
   pricePerPerson: number;
   imageUrl: string;
   isActive: boolean;
+  themeDate: string;
+  themeTime: string;
 }
