@@ -1,78 +1,55 @@
-// src/pages/ReservationPage.tsx
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { Calendar } from "../components/ui/Calendar";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
 import api from "../api";
 import type { Theme } from "../types/theme";
 
-export default function ReservationPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { id } = useParams<{ id: string }>();
-
-  const [themeData, setThemeData] = useState<Theme | null>(
-    (location.state as any)?.theme || null
+/* =========================
+   난이도 별
+========================= */
+function DifficultyStars({ level }: { level: number }) {
+  return (
+    <span className="flex gap-[2px]">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <span
+          key={i}
+          className={i < level ? "text-black" : "text-neutral-300"}
+        >
+          ★
+        </span>
+      ))}
+    </span>
   );
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+}
 
-  // 서버에서 테마 데이터 가져오기
+/* =========================
+   Theme Page
+========================= */
+export default function ThemePage(): JSX.Element {
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [themes, setThemes] = useState<Theme[]>([]);
+
   useEffect(() => {
-    if (!themeData && id) {
-      api
-        .get<Theme>(`/themes/${id}`)
-        .then((res) => setThemeData(res.data))
-        .catch(() => setThemeData(null));
-    }
-  }, [id, themeData]);
-
-  // NEXT 버튼 클릭 검사
-  const nextBtn = () => {
-    if (!themeData) return;
-    if (selectedDates.length !== 0) {
-      alert("날짜를 선택해주세요.");
-      return;
-    }
-    if (!selectedTime) {
-      alert("시간을 선택해주세요.");
-      return;
-    }
-
-    // 선택된 날짜를 문자열로 변환
-    const selectedDateStr = selectedDates.map((d) => d.toISOString().split("T")[0]).join(",");
-
-    navigate(`/reservation/${themeData.themeId}/payment`, {
-      state: {
-        themeData,
-        selectedDates: selectedDateStr,
-        selectedTime,
-      },
-    });
-  };
-
-  if (!themeData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-xl font-bold">
-        로딩 중이거나 잘못된 접근입니다.
-      </div>
-    );
-  }
-
-  const imgSrc = themeData.imageUrl.startsWith("http")
-    ? themeData.imageUrl
-    : `http://localhost:8080/upload/${themeData.imageUrl.replace(/^\/?upload\//, "")}`;
+    api.get("/themes").then((res) => setThemes(res.data));
+  }, []);
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-white text-black">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
+      {/* 메뉴 버튼 */}
+      <header className="fixed top-0 left-0 z-50 w-full flex justify-center pt-6 mt-9">
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
-            ${menuOpen ? "ml-[350px]" : "ml-0"}`}
+          onClick={() => setMenuOpen((p) => !p)}
+          className={`
+            max-w-[1400px] w-full
+            flex items-center space-x-3
+            py-[13px] px-5
+            bg-white rounded-lg shadow-all-xl
+            transition-all duration-300
+            ${menuOpen ? "ml-[350px]" : "ml-0"}
+          `}
         >
           <svg
             className="w-12 h-12 text-gray-900"
@@ -83,76 +60,94 @@ export default function ReservationPage() {
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16" />
           </svg>
-          <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
+          <span className="text-4xl font-[1000]">MENU</span>
         </button>
       </header>
 
-      <div className={`min-h-screen flex justify-center transition-all duration-300 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
-        <div className="bg-white w-full max-w-[1400px] rounded-xl shadow-all-xl p-5 flex gap-6 mt-[150px]">
-          {/* 왼쪽 박스: 테마 이미지 + 제목 + 설명 */}
-          <div className="w-[55%] flex flex-col items-center">
-            <div className="w-full h-[700px] overflow-hidden rounded-lg shadow">
-              <img
-                src={imgSrc}
-                alt={themeData.themeName}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/no-image.png";
-                }}
-              />
-            </div>
-            <h2 className="text-2xl font-bold mt-6">{themeData.themeName}</h2>
-            <p className="text-sm text-gray-600 mt-2 text-center">{themeData.themeDescription}</p>
+      <main className={`transition-all duration-300 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
+        {/* Hero */}
+        <section className="pt-44">
+          <div className="h-[520px] flex items-center justify-center">
+            <h2 className="text-6xl font-bold tracking-[0.4em]">RESERVATION</h2>
           </div>
+        </section>
 
-          {/* 오른쪽 박스: 캘린더 + 시간 선택 + NEXT 버튼 */}
-          <div className="w-[100%] flex flex-col gap-6">
-            <div className="bg-gray-50 rounded-lg p-6 shadow w-[420px] h-[485px]">
-              <h3 className="text-lg font-bold mb-4">날짜 선택</h3>
-              <div className="w-full max-w-[450px]">
-                <Calendar
-                  className="w-full h-[380px]"
-                  selectedDates={selectedDates}
-                  onSelectDates={setSelectedDates}
-                />
-              </div>
-            </div>
+        {/* Theme Grid */}
+        <section className="max-w-[1400px] mx-auto px-8 py-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
+            {themes.map((theme) => (
+              <article
+                key={theme.themeId}
+                onClick={() => navigate("/reservation", { state: { theme } })}
+                className="
+                  cursor-pointer
+                  bg-white
+                  rounded-3xl
+                  border border-neutral-200
+                  overflow-hidden
+                  shadow-[0_25px_50px_rgba(0,0,0,0.15)]
+                  transition
+                  hover:-translate-y-1
+                "
+              >
+                {/* 이미지 영역 */}
+                <div className="h-[600px] overflow-hidden bg-black">
+                  <img
+                    src={
+                      theme.imageUrl.startsWith("http")
+                        ? theme.imageUrl
+                        : `http://localhost:8080/upload/${theme.imageUrl}`
+                    }
+                    alt={theme.themeName}
+                    className="
+                      w-full h-full object-cover
+                      transition-transform duration-700
+                      hover:scale-105
+                    "
+                  />
+                </div>
 
-            <div className="bg-gray-50 rounded-lg p-6 shadow flex flex-col gap-4">
-              <h3 className="text-lg font-bold">시간 선택</h3>
-              <div className="grid grid-cols-4 gap-3 text-center">
-                {["10:00", "12:00", "14:00", "16:00", "18:00", "20:00"].map((time) => (
+                {/* 구분선 (영역 분리 포인트) */}
+                <div className="h-[1px] bg-neutral-200" />
+
+                {/* 정보 영역 */}
+                <div className="p-6 bg-white">
+                  <h3 className="text-2xl font-semibold mb-3">
+                    {theme.themeName}
+                  </h3>
+
+                  <div className="space-y-2 text-sm text-neutral-700">
+                    <p>PLAY TIME · {theme.playTime} MIN</p>
+
+                    <div className="flex items-center gap-2">
+                      <span>DIFFICULTY ·</span>
+                      <DifficultyStars level={theme.difficulty} />
+                    </div>
+                  </div>
+
                   <button
-                    key={time}
-                    onClick={() => setSelectedTime(time)}
-                    className={`py-2 border rounded ${
-                      selectedTime === time ? "bg-black text-white" : "bg-white hover:bg-gray-100"
-                    }`}
+                    className="
+                      mt-6 w-full py-3
+                      border border-black
+                      text-xs tracking-[0.3em]
+                      transition
+                      hover:bg-black hover:text-white
+                    "
                   >
-                    {time}
+                    RESERVATION
                   </button>
-                ))}
-              </div>
-
-              <div className="mt-4 flex flex-col gap-3">
-                <button
-                  onClick={nextBtn}
-                  className="w-full py-3 bg-black text-white rounded-lg text-2xl font-black hover:bg-gray-800 transition"
-                >
-                  N E X T
-                </button>
-                <button
-                  onClick={() => window.history.back()}
-                  className="w-full py-3 border rounded-lg hover:bg-gray-50 text-2xl font-bold"
-                >
-                  ← 돌아가기
-                </button>
-              </div>
-            </div>
-            <p/>
+                </div>
+              </article>
+            ))}
           </div>
-        </div>
-      </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
+          <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
+          <p className="mt-3">PRIVATE UI CLONE</p>
+        </footer>
+      </main>
     </div>
   );
 }
