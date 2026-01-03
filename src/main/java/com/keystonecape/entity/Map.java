@@ -32,10 +32,4 @@ public class Map {
     private Double longitude;
 
 
-
-
-
-
-
-
 }

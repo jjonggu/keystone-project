@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar } from "../components/ui/Calendar";
-import {
-  toadImg,
-  pinokioImg,
-  reverbImg,
-  goallthewayImg,
-  luciddreamImg,
-  apartmentImg,
-} from "../assets/images/common";
 import Menubar from "../components/ui/Menubar";
 import KakaoMap from "../components/map/KakaoMap";
 
-// ⭐ DB에서 오는 Map 데이터 타입
+// DB에서 오는 Map 데이터 타입
 interface MapLocation {
   mapId: number;
   mapName: string;
@@ -21,27 +12,14 @@ interface MapLocation {
   longitude: number;
 }
 
-export default function ReservationPage() {
+export default function MapPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
-
-  const themesData = [
-    { title: "두껍아 두껍아 헌집줄께 새집다오", imageUrl: toadImg },
-    { title: "피노키오", imageUrl: pinokioImg },
-    { title: "잔향", imageUrl: reverbImg },
-    { title: "끝까지 간다", imageUrl: goallthewayImg },
-    { title: "루시드 드림", imageUrl: luciddreamImg },
-    { title: "201호 202호", imageUrl: apartmentImg },
-  ];
-
-  const themeData = themesData[Number(id) - 1];
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // ⭐ DB에서 가져온 지도 데이터
+  // DB에서 가져온 지도 데이터
   const [mapData, setMapData] = useState<MapLocation | null>(null);
 
-  // ⭐ 페이지 로드시 DB에서 좌표 가져오기
+  // 페이지 로드시 DB에서 좌표
   useEffect(() => {
     fetch("/api/map")
       .then((res) => res.json())
@@ -79,8 +57,20 @@ export default function ReservationPage() {
           className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
             ${menuOpen ? "ml-[350px]" : "ml-0"}`}
         >
-          <span className="text-4xl font-bold">☰</span>
-          <span className="font-[1000] text-gray-900 text-4xl mb-1">MAP</span>
+          <svg
+            className="w-12 h-12 text-gray-900"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={3}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 5h16M4 12h16M4 19h16"
+            />
+          </svg>
+          <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
         </button>
       </header>
 

@@ -7,7 +7,7 @@ import Key2 from "../assets/images/key2.png";
 
 
 
-// ★ 공통 애니메이션 컴포넌트 (스크롤 시 등장)
+// 공통 애니메이션 컴포넌트
 function FadeUp({ children, delay = 0 }) {
   const ref = useRef(null);
   const [show, setShow] = useState(false);
@@ -66,7 +66,7 @@ export default function NoticeAboutPage() {
               d="M4 5h16M4 12h16M4 19h16"
             ></path>
           </svg>
-          <span className="font-[1000] text-gray-900 text-4xl mb-1">ABOUT</span>
+          <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
         </button>
       </header>
 
@@ -76,8 +76,6 @@ export default function NoticeAboutPage() {
           menuOpen ? "ml-[350px]" : "ml-0"
         } transition-all duration-300`}
       >
-
-        {/* 🔥 HERO (키이스케이프 느낌 그대로) */}
         <div className="w-full h-[500px] relative mt-[150px] bg-black overflow-hidden">
 
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -94,7 +92,7 @@ export default function NoticeAboutPage() {
           </div>
         </div>
 
-         {/* SECTION 1 */}
+                 {/* 섹션 1 */}
                 <section className="w-full bg-gray-100 py-24">
                   <div className="max-w-[1200px] mx-auto px-6 space-y-20">
                     <FadeUp>
@@ -108,7 +106,6 @@ export default function NoticeAboutPage() {
                       </p>
                     </FadeUp>
 
-                    {/* IMAGE + TEXT */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                       <FadeUp>
                         <img
@@ -160,7 +157,7 @@ export default function NoticeAboutPage() {
                     </FadeUp>
                   </div>
                 </section>
-        {/* ⭐ 새로 추가한: 방문 전 주의사항 섹션 */}
+        {/* 방문 전 주의사항 */}
         <section className="w-full bg-white py-24 flex justify-center border-t border-gray-200">
           <div className="max-w-[1400px] w-full px-6">
             <FadeUp>
@@ -271,15 +268,8 @@ export default function NoticeAboutPage() {
           </div>
         </section>
 
+        {/* 환불 규정*/}
 
-
-
-
-
-
-
-
-{/* ⭐ 위에꺼 좌우반전 바꿔서 */}
         <section className="w-full bg-white py-24 flex justify-center border-t border-gray-200">
           <div className="max-w-[1400px] w-full px-6">
             <FadeUp>
@@ -303,7 +293,7 @@ export default function NoticeAboutPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-14">
 
-              {/* LEFT: 취소 및 환불 규정 리스트 */}
+              {/* 취소 및 환불 규정 리스트 */}
               <FadeUp delay={200}>
                 <div className="grid grid-cols-1 gap-8">
 
@@ -361,29 +351,7 @@ export default function NoticeAboutPage() {
           </div>
         </section>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        {/* ⭐ 섹션 3 */}
+        {/* 섹션 3 */}
         <section className="py-20 flex justify-center">
           <div className="max-w-[1400px] w-full text-center px-6">
             <FadeUp>
