@@ -44,9 +44,4 @@ public class Theme {
     @Column(nullable = false)
     private Boolean isActive;
 
-    @Column(name = "theme_date", nullable = true)
-    private LocalDate themeDate;
-
-    @Column(name = "theme_time", nullable = true)
-    private LocalTime themeTime;
 }

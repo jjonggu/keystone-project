@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
 import api from "../api";
 import type { Theme } from "../types/theme";
+import type { TimeSlot } from "../types/timeSlot";
+import { Calendar } from "../components/ui/Calendar";
+import { useNavigate } from "react-router-dom";
+
 
 /* =========================
    난이도 별
@@ -22,16 +25,62 @@ function DifficultyStars({ level }: { level: number }) {
   );
 }
 
-/* =========================
-   Theme Page
-========================= */
+function formatLocalDate(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+
+
+
+
+
+
 export default function ThemePage(): JSX.Element {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [themes, setThemes] = useState<Theme[]>([]);
 
+
+  /** 캘린더 상태 */
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  /** 테마별 예약 가능 시간 */
+  const [availableTimes, setAvailableTimes] = useState<{
+    [themeId: number]: TimeSlot[];
+  }>({});
+
+  /* 테마 목록 */
   useEffect(() => {
     api.get("/themes").then((res) => setThemes(res.data));
+  }, []);
+
+  /* 날짜 변경 시 예약 가능 시간 조회 */
+  useEffect(() => {
+const dateStr = formatLocalDate(selectedDate);
+
+    themes.forEach((theme) => {
+      api
+        .get(`/themes/${theme.themeId}/available-times`, {
+          params: { date: dateStr },
+        })
+        .then((res) => {
+          setAvailableTimes((prev) => ({
+            ...prev,
+            [theme.themeId]: res.data,
+          }));
+        });
+    });
+  }, [themes, selectedDate]);
+
+  /* 캘린더 닫기 이벤트 */
+  useEffect(() => {
+    const close = () => setCalendarOpen(false);
+    window.addEventListener("calendar-close", close);
+    return () => window.removeEventListener("calendar-close", close);
   }, []);
 
   return (
@@ -72,25 +121,39 @@ export default function ThemePage(): JSX.Element {
           </div>
         </section>
 
+        {/* 날짜 선택 */}
+        <section className="flex justify-center mb-20 relative">
+          <div className="relative">
+            <div
+              className="w-[280px] border px-4 py-3 flex justify-between items-center cursor-pointer"
+              onClick={() => setCalendarOpen((p) => !p)}
+            >
+<span>{formatLocalDate(selectedDate)}</span>
+              <span>📅</span>
+            </div>
+
+            {calendarOpen && (
+              <div className="absolute top-[60px] left-0 z-50">
+                <Calendar
+                  selectedDate={selectedDate}
+                  onSelectDate={(date) => {
+                    setSelectedDate(date);
+                    setCalendarOpen(false);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Theme Grid */}
-        <section className="max-w-[1400px] mx-auto px-8 py-24">
+        <section className="max-w-[1400px] mx-auto px-8 pb-24">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
             {themes.map((theme) => (
               <article
                 key={theme.themeId}
-                onClick={() => navigate("/reservation", { state: { theme } })}
-                className="
-                  cursor-pointer
-                  bg-white
-                  rounded-3xl
-                  border border-neutral-200
-                  overflow-hidden
-                  shadow-[0_25px_50px_rgba(0,0,0,0.15)]
-                  transition
-                  hover:-translate-y-1
-                "
+                className="bg-white rounded-3xl border border-neutral-200 overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.15)]"
               >
-                {/* 이미지 영역 */}
                 <div className="h-[600px] overflow-hidden bg-black">
                   <img
                     src={
@@ -99,54 +162,66 @@ export default function ThemePage(): JSX.Element {
                         : `http://localhost:8080/upload/${theme.imageUrl}`
                     }
                     alt={theme.themeName}
-                    className="
-                      w-full h-full object-cover
-                      transition-transform duration-700
-                      hover:scale-105
-                    "
+                    className="w-full h-full object-cover"
                   />
                 </div>
 
-                {/* 구분선 (영역 분리 포인트) */}
-                <div className="h-[1px] bg-neutral-200" />
-
-                {/* 정보 영역 */}
-                <div className="p-6 bg-white">
+                <div className="p-6">
                   <h3 className="text-2xl font-semibold mb-3">
                     {theme.themeName}
                   </h3>
 
-                  <div className="space-y-2 text-sm text-neutral-700">
-                    <p>PLAY TIME · {theme.playTime} MIN</p>
+                  <p className="text-sm mb-2">
+                    PLAY TIME · {theme.playTime} MIN
+                  </p>
 
-                    <div className="flex items-center gap-2">
-                      <span>DIFFICULTY ·</span>
-                      <DifficultyStars level={theme.difficulty} />
-                    </div>
+                  <DifficultyStars level={theme.difficulty} />
+
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {availableTimes[theme.themeId]?.length === 0 && (
+                      <span className="text-xs text-neutral-400">
+                        예약 마감
+                      </span>
+                    )}
+
+                    {availableTimes[theme.themeId]?.length === 0 && (
+                      <span className="text-xs text-neutral-400">
+                        예약 마감
+                      </span>
+                    )}
+
+                    {availableTimes[theme.themeId]?.map((slot) => (
+                      <button
+                        key={slot.timeSlotId}
+                        disabled={slot.reserved}
+                        className="
+                          px-3 py-1 text-xs border rounded-md
+                          hover:bg-black hover:text-white
+                          disabled:opacity-40
+                          disabled:cursor-not-allowed
+                        "
+                        onClick={() => {
+                          if (slot.reserved) return;
+
+                          navigate("/reservation/form", {
+                            state: {
+                              theme,
+                              date: formatLocalDate(selectedDate),
+                              timeSlot: slot,
+                            },
+                          });
+                        }}
+                      >
+                        {slot.startTime.slice(0, 5)}
+                      </button>
+                    ))}
+
                   </div>
-
-                  <button
-                    className="
-                      mt-6 w-full py-3
-                      border border-black
-                      text-xs tracking-[0.3em]
-                      transition
-                      hover:bg-black hover:text-white
-                    "
-                  >
-                    RESERVATION
-                  </button>
                 </div>
               </article>
             ))}
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
-          <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
-          <p className="mt-3">PRIVATE UI CLONE</p>
-        </footer>
       </main>
     </div>
   );

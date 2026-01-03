@@ -1,16 +1,34 @@
-/* src/styles/calendar.css */
-
-/* 화살표 색상 */
-.my-calendar .rdp-chevron {
-  fill: black !important;
-}
-.my-calendar .rdp-nav-button:hover .rdp-chevron {
-  fill: gray !important;
+.calendar-popup {
+  width: 320px;
+  border: 1px solid #000;
+  background: #fff;
+  padding: 10px;
 }
 
-/* 전체 달력 스케일 키우기 */
-.my-calendar {
-  transform: scale(1.2);   /* 달력 전체 1.5배 확대 */
-  transform-origin: top left; /* 위치 고정 */
+.rdp-weekday:first-child {
+  color: red;
+}
+.rdp-weekday:last-child {
+  color: blue;
 }
 
+.rdp-day_selected {
+  background-color: #b57b5c !important;
+  color: white;
+}
+
+.calendar-footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #ddd;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.calendar-today,
+.calendar-close {
+  font-size: 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}

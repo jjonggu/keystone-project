@@ -28,4 +28,8 @@ public class ThemeController {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Theme not found"));
     }
+
+
+
+
 }
