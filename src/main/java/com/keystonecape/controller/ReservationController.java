@@ -65,10 +65,9 @@ public class ReservationController {
 
         TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
                 .orElseThrow(() -> new RuntimeException("TimeSlot 없음"));
-
-        // 🚫 이미 예약된 시간 체크
-        boolean exists =
-                reservationRepository
+        
+        // 예약된 테마는 비활성화
+        boolean exists = reservationRepository
                         .existsByThemeAndTimeSlotAndReservationDate(theme, timeSlot, date);
 
         if (exists) {

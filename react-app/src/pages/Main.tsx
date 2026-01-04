@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import Menubar from "../components/ui/Menubar";
 import type { Theme } from "../types/theme";
 import { Banner, mainrogo } from "../assets/images/common";
 import api from "../api";
 
-/* =========================
-   별 난이도 컴포넌트
-========================= */
+/* 별 난이도 컴포넌트 */
 function DifficultyStars({ level }: { level: number }) {
   return (
     <span className="flex items-center gap-1">
@@ -24,9 +21,7 @@ function DifficultyStars({ level }: { level: number }) {
   );
 }
 
-/* =========================
-   타입
-========================= */
+/* 타입 */
 interface ThemeModalProps {
   open: boolean;
   onClose: () => void;
@@ -34,9 +29,7 @@ interface ThemeModalProps {
   navigate: ReturnType<typeof useNavigate>;
 }
 
-/* =========================
-   모달
-========================= */
+/* 모달 */
 function ThemeModal({
   open,
   onClose,
@@ -111,9 +104,7 @@ function ThemeModal({
   );
 }
 
-/* =========================
-   메인 페이지
-========================= */
+/* 메인 페이지 */
 export default function Theme(): JSX.Element {
   const navigate = useNavigate();
 
@@ -197,10 +188,6 @@ export default function Theme(): JSX.Element {
         </div>
       </section>
 
-      {/* 테마 정보 표시해야함 */ }
-      <h1></h1>
-
-
       {/* 테마 정보 목록 */}
       <section className="max-w-[1400px] mx-auto px-8 py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
@@ -233,6 +220,7 @@ export default function Theme(): JSX.Element {
       <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
         <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
         <p className="mt-3">PRIVATE UI CLONE</p>
+        <p className="mt-3">Tel: 010 1234 5678</p>
       </footer>
     </div>
   );

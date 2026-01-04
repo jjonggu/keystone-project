@@ -1,67 +1,84 @@
-import React from "react";
-import { DayPicker } from "react-day-picker";
-import { ko } from "date-fns/locale";
-
-import "react-day-picker/dist/style.css";
+import * as React from "react"
+import { ChevronDownIcon } from "lucide-react"
+import { ko } from "date-fns/locale"
+import { DayPicker } from "react-day-picker"
+import "react-day-picker/dist/style.css"
 import "@styles/calendar.css";
 
 interface CalendarProps {
-  selectedDate: Date;
-  onSelectDate: (date: Date) => void;
+  selectedDate: Date | null
+  onSelectDate: (date: Date) => void
 }
 
-/** ⭐ 날짜 시간 제거 유틸 */
+/* 날짜 시간 제거 */
 function normalizeDate(date: Date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  return d
 }
 
 export function Calendar({
   selectedDate,
   onSelectDate,
 }: CalendarProps): JSX.Element {
+  const [open, setOpen] = React.useState(false)
 
-  /** 오늘 */
-  const today = normalizeDate(new Date());
-
-  /** 오늘 포함 + 7일 */
-  const maxDate = new Date(today);
-  maxDate.setDate(today.getDate() + 7);
+  const today = normalizeDate(new Date())
+  const maxDate = new Date(today)
+  maxDate.setDate(today.getDate() + 7)
 
   return (
-    <div className="calendar-popup">
-      <DayPicker
-        mode="single"
-        locale={ko}
-        selected={normalizeDate(selectedDate)} // ⭐ 여기 중요
-        onSelect={(date) => {
-          if (date) {
-            onSelectDate(normalizeDate(date)); // ⭐ 여기 중요
-          }
-        }}
-        disabled={[
-          { before: today },
-          { after: maxDate },
-        ]}
-      />
+    <div className="relative w-[180px]">
+      {/* 버튼 */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-lg hover:bg-gray-50"
+      >
+        {selectedDate
+          ? selectedDate.toLocaleDateString("ko-KR")
+          : "날짜 선택"}
+        <ChevronDownIcon className="h-4 w-4 opacity-50" />
+      </button>
 
-      <div className="calendar-footer">
-        <button
-          className="calendar-today"
-          onClick={() => onSelectDate(today)}
+      {/* 달력 */}
+      {open && (
+        <div
+          className="absolute left-0 z-50 mt-2 rounded-md border bg-white p-5 shadow-lg"
+          onClick={(e) => e.stopPropagation()}
         >
-          TODAY
-        </button>
-        <button
-          className="calendar-close"
-          onClick={() =>
-            window.dispatchEvent(new Event("calendar-close"))
-          }
-        >
-          ✕ CLOSE
-        </button>
-      </div>
+          <DayPicker
+            mode="single"
+            locale={ko}
+            selected={selectedDate ?? undefined}
+            onSelect={(date) => {
+              if (!date) return
+              onSelectDate(normalizeDate(date))
+              setOpen(false)
+            }}
+            disabled={[
+              { before: today },
+              { after: maxDate },
+            ]}
+            modifiers={{
+              sunday: { dayOfWeek: [0] },
+              saturday: { dayOfWeek: [6] },
+            }}
+            modifiersClassNames={{
+              sunday: "text-red-500",
+              saturday: "text-red-500",
+            }}
+            classNames={{
+              day: "h-9 w-9 rounded-md hover:bg-gray-100",
+              day_selected: "bg-black text-white hover:bg-black",
+              day_today: "border border-black",
+
+              /** 🔥 여기 핵심 — 화살표 <> 검정 */
+              nav_button: "text-black hover:text-black",
+            }}
+          />
+        </div>
+      )}
     </div>
-  );
+  )
 }

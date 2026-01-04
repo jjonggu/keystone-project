@@ -39,11 +39,4 @@ public class ThemeService {
                 )
                 .toList();
     }
-
-
-
-
-
-
-
 }

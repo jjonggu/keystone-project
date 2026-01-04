@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
 import KakaoMap from "../components/map/KakaoMap";
 
-// DB에서 오는 Map 데이터 타입
 interface MapLocation {
   mapId: number;
   mapName: string;
@@ -25,7 +24,7 @@ export default function MapPage() {
       .then((res) => res.json())
       .then((data: MapLocation[]) => {
         if (data.length > 0) {
-          setMapData(data[0]); // 강남지점 하나라고 가정
+          setMapData(data[0]);
         }
       })
       .catch((err) => console.error("지도 데이터 불러오기 오류:", err));
@@ -79,7 +78,7 @@ export default function MapPage() {
           menuOpen ? "ml-[350px]" : "ml-0"
         }`}
       >
-        <div className="w-full max-w-[1400px] mt-44 px-6">
+        <div className="w-full max-w-[1400px] mt-44">
           <div className="flex gap-10 w-full h-[650px]">
             {/* 왼쪽 안내 */}
             <div className="w-[30%] bg-white rounded-2xl shadow-all-xl p-10 flex flex-col justify-start h-full">
@@ -113,6 +112,12 @@ export default function MapPage() {
           </div>
         </div>
       </div>
+      {/* Footer */}
+      <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
+       <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
+       <p className="mt-3">PRIVATE UI CLONE</p>
+       <p className="mt-3">Tel: 010 1234 5678</p>
+       </footer>
     </div>
   );
 }

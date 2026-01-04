@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
+import { Calendar } from "../components/ui/Calendar";
 import api from "../api";
 import type { Theme } from "../types/theme";
 import type { TimeSlot } from "../types/timeSlot";
-import { Calendar } from "../components/ui/Calendar";
-import { useNavigate } from "react-router-dom";
 
-
-/* =========================
-   난이도 별
-========================= */
+/* 난이도 별 */
 function DifficultyStars({ level }: { level: number }) {
   return (
-    <span className="flex gap-[2px]">
+    <span className="flex gap-[2px] text-xl">
       {Array.from({ length: 5 }).map((_, i) => (
         <span
           key={i}
@@ -32,17 +29,11 @@ function formatLocalDate(date: Date) {
   return `${y}-${m}-${d}`;
 }
 
-
-
-
-
-
-
 export default function ThemePage(): JSX.Element {
   const navigate = useNavigate();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [themes, setThemes] = useState<Theme[]>([]);
-
 
   /** 캘린더 상태 */
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -60,7 +51,7 @@ export default function ThemePage(): JSX.Element {
 
   /* 날짜 변경 시 예약 가능 시간 조회 */
   useEffect(() => {
-const dateStr = formatLocalDate(selectedDate);
+    const dateStr = formatLocalDate(selectedDate);
 
     themes.forEach((theme) => {
       api
@@ -107,54 +98,50 @@ const dateStr = formatLocalDate(selectedDate);
             strokeWidth={3}
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 5h16M4 12h16M4 19h16"
+            />
           </svg>
           <span className="text-4xl font-[1000]">MENU</span>
         </button>
       </header>
 
-      <main className={`transition-all duration-300 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
+      <main
+        className={`transition-all duration-300 ${
+          menuOpen ? "ml-[350px]" : "ml-0"
+        }`}
+      >
         {/* Hero */}
-        <section className="pt-44">
-          <div className="h-[520px] flex items-center justify-center">
-            <h2 className="text-6xl font-bold tracking-[0.4em]">RESERVATION</h2>
+        <section className="pt-22 mt-[10rem]">
+          <div className="h-[200px] flex justify-center items-center">
+            <h2 className="text-6xl font-bold tracking-[0.4em]">
+              RESERVATION
+            </h2>
           </div>
         </section>
 
         {/* 날짜 선택 */}
-        <section className="flex justify-center mb-20 relative">
-          <div className="relative">
-            <div
-              className="w-[280px] border px-4 py-3 flex justify-between items-center cursor-pointer"
-              onClick={() => setCalendarOpen((p) => !p)}
-            >
-<span>{formatLocalDate(selectedDate)}</span>
-              <span>📅</span>
-            </div>
-
-            {calendarOpen && (
-              <div className="absolute top-[60px] left-0 z-50">
-                <Calendar
-                  selectedDate={selectedDate}
-                  onSelectDate={(date) => {
-                    setSelectedDate(date);
-                    setCalendarOpen(false);
-                  }}
-                />
-              </div>
-            )}
-          </div>
+        <section className="flex ml-[17.5rem] mb-[40px]">
+          <Calendar
+            selectedDate={selectedDate}
+            onSelectDate={(date) => {
+              setSelectedDate(date)
+            }}
+          />
         </section>
 
-        {/* Theme Grid */}
+        {/* Theme List */}
         <section className="max-w-[1400px] mx-auto px-8 pb-24">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
+          <div className="flex flex-col gap-12">
             {themes.map((theme) => (
               <article
                 key={theme.themeId}
-                className="bg-white rounded-3xl border border-neutral-200 overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.15)]"
+                className="flex gap-8 border-b pb-10"
               >
-                <div className="h-[600px] overflow-hidden bg-black">
+                {/* 이미지 */}
+                <div className="w-[350px] h-[520px] bg-black overflow-hidden flex-shrink-0">
                   <img
                     src={
                       theme.imageUrl.startsWith("http")
@@ -166,26 +153,22 @@ const dateStr = formatLocalDate(selectedDate);
                   />
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-2xl font-semibold mb-3">
+                {/* 정보 + 시간 */}
+                <div className="flex-1 ml-5">
+                  <h3 className="text-4xl font-bold mb-2">
                     {theme.themeName}
                   </h3>
 
-                  <p className="text-sm mb-2">
+                  <p className="text-xl mb-3 text-gray-900 text-opacity-30">
                     PLAY TIME · {theme.playTime} MIN
                   </p>
 
                   <DifficultyStars level={theme.difficulty} />
 
-                  <div className="mt-6 flex flex-wrap gap-2">
+                  {/* 시간 버튼 */}
+                  <div className="mt-[100px] flex flex-wrap gap-3">
                     {availableTimes[theme.themeId]?.length === 0 && (
-                      <span className="text-xs text-neutral-400">
-                        예약 마감
-                      </span>
-                    )}
-
-                    {availableTimes[theme.themeId]?.length === 0 && (
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-sm text-neutral-400">
                         예약 마감
                       </span>
                     )}
@@ -194,12 +177,14 @@ const dateStr = formatLocalDate(selectedDate);
                       <button
                         key={slot.timeSlotId}
                         disabled={slot.reserved}
-                        className="
-                          px-3 py-1 text-xs border rounded-md
-                          hover:bg-black hover:text-white
-                          disabled:opacity-40
-                          disabled:cursor-not-allowed
-                        "
+                        className={`
+                          min-w-[200px] py-2 text-xl border
+                          ${
+                            slot.reserved
+                              ? "bg-gray-400 text-white cursor-not-allowed"
+                              : "hover:bg-black hover:text-white"
+                          }
+                        `}
                         onClick={() => {
                           if (slot.reserved) return;
 
@@ -215,7 +200,6 @@ const dateStr = formatLocalDate(selectedDate);
                         {slot.startTime.slice(0, 5)}
                       </button>
                     ))}
-
                   </div>
                 </div>
               </article>

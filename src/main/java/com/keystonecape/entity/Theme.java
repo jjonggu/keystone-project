@@ -43,5 +43,4 @@ public class Theme {
 
     @Column(nullable = false)
     private Boolean isActive;
-
 }

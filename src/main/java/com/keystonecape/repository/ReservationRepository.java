@@ -26,5 +26,4 @@ public interface ReservationRepository
             Long timeSlotId,
             LocalDate reservationDate
     );
-
 }

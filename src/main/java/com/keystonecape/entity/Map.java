@@ -30,6 +30,4 @@ public class Map {
 
     @Column(nullable = false)
     private Double longitude;
-
-
 }

@@ -16,7 +16,6 @@ public class MapController {
 
     private final MapRepository mapRepository;
 
-    // 지도 데이터 조회
     @GetMapping("/map")
     public List<Map> getMapLocations() {
         return mapRepository.findAll();

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Menubar from "../components/ui/Menubar";
 import api from "../api";
 import type { Theme } from "../types/theme";
 import type { TimeSlot } from "../types/timeSlot";
@@ -14,7 +15,10 @@ export default function ReservationFormPage(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
 
-  /** 🔴 새로고침 / 잘못된 접근 방어 */
+  /* MENU 상태 */
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  /* 새로고침 / 잘못된 접근 방어 */
   if (!location.state) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -33,8 +37,8 @@ export default function ReservationFormPage(): JSX.Element {
 
   const { theme, date, timeSlot } = location.state as LocationState;
 
-  const [name, setName] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [headCount, setHeadCount] = useState<number>(theme.minPerson);
   const [paymentType, setPaymentType] = useState<"CARD" | "CASH">("CARD");
 
@@ -66,80 +70,125 @@ export default function ReservationFormPage(): JSX.Element {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex justify-center items-center">
-      <div className="flex w-[900px] bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div className="relative min-h-screen bg-neutral-100">
+      {/* 사이드 메뉴 */}
+      <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-        {/* 왼쪽 - 테마 이미지 */}
-        <div className="w-1/2 bg-black">
-          <img
-            src={
-              theme.imageUrl.startsWith("http")
-                ? theme.imageUrl
-                : `http://localhost:8080/upload/${theme.imageUrl}`
-            }
-            alt={theme.themeName}
-            className="w-full h-full object-cover"
-          />
-        </div>
+      {/* ✅ MENU 헤더 */}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`
+            transition-all duration-300
+            py-[13px] px-5
+            bg-white rounded-lg shadow-all-xl
+            flex items-center space-x-3
+            max-w-[1400px] w-full
+            ${menuOpen ? "ml-[350px]" : "ml-0"}
+          `}
+        >
+          <svg
+            className="w-12 h-12 text-gray-900"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={3}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 5h16M4 12h16M4 19h16"
+            />
+          </svg>
+          <span className="font-[1000] text-gray-900 text-4xl mb-1">
+            MENU
+          </span>
+        </button>
+      </header>
 
-        {/* 오른쪽 - 예약 폼 */}
-        <div className="w-1/2 p-8">
-          <h2 className="text-2xl font-bold mb-6">예약 정보 입력</h2>
+      {/* 본문 */}
+      <main
+        className={`transition-all duration-300 flex justify-center items-center min-h-screen
+          ${menuOpen ? "ml-[350px]" : "ml-0"}
+        `}
+      >
+        <div className="flex w-[900px] bg-white rounded-2xl shadow-xl overflow-hidden mt-[120px]">
 
-          {/* 예약 요약 */}
-          <div className="space-y-2 text-sm mb-6">
-            <p>테마: {theme.themeName}</p>
-            <p>날짜: {date}</p>
-            <p>시간: {timeSlot.startTime.slice(0, 5)}</p>
+          {/* 왼쪽 - 테마 이미지 */}
+          <div className="w-1/2 bg-black">
+            <img
+              src={
+                theme.imageUrl.startsWith("http")
+                  ? theme.imageUrl
+                  : `http://localhost:8080/upload/${theme.imageUrl}`
+              }
+              alt={theme.themeName}
+              className="w-full h-full object-cover"
+            />
           </div>
 
-          {/* 입력 폼 */}
-          <div className="space-y-4">
-            <input
-              placeholder="예약자 이름"
-              className="w-full border px-3 py-2 rounded"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+          {/* 오른쪽 - 예약 폼 */}
+          <div className="w-1/2 p-8">
+            <h2 className="text-2xl font-bold mb-6">예약 정보 입력</h2>
 
-            <input
-              placeholder="전화번호"
-              className="w-full border px-3 py-2 rounded"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
+            <div className="space-y-2 text-sm mb-6">
+              <p>테마: {theme.themeName}</p>
+              <p>날짜: {date}</p>
+              <p>시간: {timeSlot.startTime.slice(0, 5)}</p>
+            </div>
 
-            <div>
-              <label className="text-sm block mb-1">인원 수</label>
-              <select
+            <div className="space-y-4">
+              <input
+                placeholder="예약자 이름"
                 className="w-full border px-3 py-2 rounded"
-                value={headCount}
-                onChange={(e) => setHeadCount(Number(e.target.value))}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+
+              <input
+                placeholder="전화번호"
+                className="w-full border px-3 py-2 rounded"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+
+              <div>
+                <label className="text-sm block mb-1">인원 수</label>
+                <select
+                  className="w-full border px-3 py-2 rounded"
+                  value={headCount}
+                  onChange={(e) => setHeadCount(Number(e.target.value))}
+                >
+                  {Array.from({ length: 10 }).map((_, i) => {
+                    const count = i + theme.minPerson;
+                    return (
+                      <option key={count} value={count}>
+                        {count}명
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div className="text-lg font-semibold">
+                총 금액: {totalPrice.toLocaleString()}원
+              </div>
+
+              <button
+                onClick={submitReservation}
+                className="w-full py-3 bg-black text-white rounded mt-4"
               >
-                {Array.from({ length: 10 }).map((_, i) => {
-                  const count = i + theme.minPerson;
-                  return (
-                    <option key={count} value={count}>
-                      {count}명
-                    </option>
-                  );
-                })}
-              </select>
+                예약하기
+              </button>
             </div>
-
-            <div className="text-lg font-semibold">
-              총 금액: {totalPrice.toLocaleString()}원
-            </div>
-
-            <button
-              onClick={submitReservation}
-              className="w-full py-3 bg-black text-white rounded mt-4"
-            >
-              예약하기
-            </button>
           </div>
         </div>
-      </div>
+      </main>
+        <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
+          <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
+          <p className="mt-3">PRIVATE UI CLONE</p>
+          <p className="mt-3">Tel: 010 1234 5678</p>
+        </footer>
     </div>
   );
 }
