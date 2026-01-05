@@ -96,6 +96,19 @@ export default function MapPage() {
 
               <div className="mb-10">
                 <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">📍</span>
+                  <p className="text-gray-800 text-xl font-semibold">영업시간</p>
+                </div>
+                <p className="text-gray-600 text-base ml-10 leading-relaxed">
+                   평일 : 8:00-24:00
+                </p>
+                <p className="text-gray-600 text-base ml-10 leading-relaxed">
+                   주말/공휴일 : 8:00~24:30
+                </p>
+              </div>
+
+              <div className="mb-10">
+                <div className="flex items-center gap-3 mb-3">
                   <span className="text-3xl">🚇</span>
                   <p className="text-gray-800 text-xl font-semibold">지하철 이용</p>
                 </div>

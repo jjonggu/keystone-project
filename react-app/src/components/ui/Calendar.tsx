@@ -4,6 +4,8 @@ import { ko } from "date-fns/locale"
 import { DayPicker } from "react-day-picker"
 import "react-day-picker/dist/style.css"
 import "@styles/calendar.css";
+import { ChevronLeft, ChevronRight } from "lucide-react"
+
 
 interface CalendarProps {
   selectedDate: Date | null
@@ -68,13 +70,14 @@ export function Calendar({
               sunday: "text-red-500",
               saturday: "text-red-500",
             }}
+            style={{
+              ["--rdp-accent-color" as any]: "#000",
+              ["--rdp-accent-color-dark" as any]: "#000",
+            }}
             classNames={{
               day: "h-9 w-9 rounded-md hover:bg-gray-100",
               day_selected: "bg-black text-white hover:bg-black",
               day_today: "border border-black",
-
-              /** 🔥 여기 핵심 — 화살표 <> 검정 */
-              nav_button: "text-black hover:text-black",
             }}
           />
         </div>

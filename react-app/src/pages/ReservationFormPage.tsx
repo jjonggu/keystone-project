@@ -4,6 +4,7 @@ import Menubar from "../components/ui/Menubar";
 import api from "../api";
 import type { Theme } from "../types/theme";
 import type { TimeSlot } from "../types/timeSlot";
+import ReCAPTCHA from "react-google-recaptcha";
 
 interface LocationState {
   theme: Theme;
@@ -42,11 +43,20 @@ export default function ReservationFormPage(): JSX.Element {
   const [headCount, setHeadCount] = useState<number>(theme.minPerson);
   const [paymentType, setPaymentType] = useState<"CARD" | "CASH">("CARD");
 
+  // ✅ reCAPTCHA state (이게 빠져서 에러났던 것)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
   const totalPrice = headCount * theme.pricePerPerson;
 
   const submitReservation = async () => {
     if (!name.trim() || !phone.trim()) {
       alert("이름과 전화번호를 입력해주세요.");
+      return;
+    }
+
+    // ✅ reCAPTCHA 체크
+    if (!captchaToken) {
+      alert("로봇이 아님을 확인해주세요.");
       return;
     }
 
@@ -59,6 +69,7 @@ export default function ReservationFormPage(): JSX.Element {
         customerPhone: phone,
         headCount,
         paymentType,
+        captchaToken, // ⭐ 서버로 같이 전송
       });
 
       alert("예약이 완료되었습니다!");
@@ -74,7 +85,7 @@ export default function ReservationFormPage(): JSX.Element {
       {/* 사이드 메뉴 */}
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      {/* ✅ MENU 헤더 */}
+      {/* MENU 헤더 */}
       <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -113,7 +124,6 @@ export default function ReservationFormPage(): JSX.Element {
         `}
       >
         <div className="flex w-[900px] bg-white rounded-2xl shadow-xl overflow-hidden mt-[120px]">
-
           {/* 왼쪽 - 테마 이미지 */}
           <div className="w-1/2 bg-black">
             <img
@@ -174,9 +184,31 @@ export default function ReservationFormPage(): JSX.Element {
                 총 금액: {totalPrice.toLocaleString()}원
               </div>
 
+              {/* reCAPTCHA */}
+              <div className="mt-6">
+                <div className="flex justify-center border border-neutral-300 rounded-lg bg-neutral-50 py-4">
+                  <ReCAPTCHA
+                    sitekey="여기에_구글_SITE_KEY"
+                    onChange={(token) => setCaptchaToken(token)}
+                  />
+                </div>
+
+                {!captchaToken && (
+                  <p className="text-xs text-red-500 text-center mt-2">
+                    예약을 진행하려면 로봇이 아님을 확인해주세요.
+                  </p>
+                )}
+              </div>
+
               <button
                 onClick={submitReservation}
-                className="w-full py-3 bg-black text-white rounded mt-4"
+                disabled={!captchaToken}
+                className={`
+                  w-full py-3 rounded mt-4 transition-all
+                  ${captchaToken
+                    ? "bg-black text-white hover:bg-neutral-800"
+                    : "bg-neutral-300 text-neutral-500 cursor-not-allowed"}
+                `}
               >
                 예약하기
               </button>
@@ -184,11 +216,12 @@ export default function ReservationFormPage(): JSX.Element {
           </div>
         </div>
       </main>
-        <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
-          <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
-          <p className="mt-3">PRIVATE UI CLONE</p>
-          <p className="mt-3">Tel: 010 1234 5678</p>
-        </footer>
+
+      <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
+        <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
+        <p className="mt-3">PRIVATE UI CLONE</p>
+        <p className="mt-3">Tel: 010 1234 5678</p>
+      </footer>
     </div>
   );
 }
