@@ -64,6 +64,12 @@ const Menubar: React.FC<MenubarProps> = ({
         >
           Map
         </Link>
+        <Link
+          to="/notice"
+          className="font-extrabold text-black hover:text-gray-600 transition"
+        >
+          Notice
+        </Link>
       </nav>
     </aside>
   );

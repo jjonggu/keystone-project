@@ -4,6 +4,7 @@ import Reservation from "../pages/Reservation";
 import ReservationFormPage from "../pages/ReservationFormPage";
 import Map from "../pages/Map";
 import About from "../pages/About";
+import Notice from "../pages/Notice";
 
 export default function AppRouter() {
   return (
@@ -19,6 +20,8 @@ export default function AppRouter() {
         <Route path="/about" element={<About />} />
         {/* 지도 */}
         <Route path="/map" element={<Map />} />
+        {/* 자주하는 질문 */}
+        <Route path="/notice" element={<Notice />} />
       </Routes>
     </BrowserRouter>
   );

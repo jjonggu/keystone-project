@@ -39,6 +39,9 @@ export default function ThemePage(): JSX.Element {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  /** 선택된 테마 ID */
+  const [selectedThemeId, setSelectedThemeId] = useState<number | "전체">("전체");
+
   /** 테마별 예약 가능 시간 */
   const [availableTimes, setAvailableTimes] = useState<{
     [themeId: number]: TimeSlot[];
@@ -122,88 +125,127 @@ export default function ThemePage(): JSX.Element {
           </div>
         </section>
 
-        {/* 날짜 선택 */}
-        <section className="flex ml-[17.5rem] mb-[40px]">
-          <Calendar
-            selectedDate={selectedDate}
-            onSelectDate={(date) => {
-              setSelectedDate(date)
-            }}
-          />
+        {/* 날짜 + 테마 선택 */}
+        <section className="flex ml-[17.5rem] mb-[40px] gap-6 items-start">
+          {/* 날짜 박스 */}
+          <div className="flex flex-col">
+            <label
+              htmlFor="calendar"
+              className="mb-2 text-sm font-semibold text-gray-700"
+            >
+              날짜 선택
+            </label>
+            <Calendar
+              selectedDate={selectedDate}
+              onSelectDate={(date) => setSelectedDate(date)}
+              id="calendar"
+              className="text-base"
+            />
+          </div>
+
+          {/* 테마 선택 드롭다운 */}
+          <div className="w-[200px] flex flex-col">
+            <label
+              htmlFor="theme"
+              className="mb-2 text-sm font-semibold text-gray-700"
+            >
+              테마 선택
+            </label>
+            <select
+              id="theme"
+              className="w-full border rounded px-3 py-2 text-base bg-white"
+              value={selectedThemeId}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedThemeId(val === "전체" ? "전체" : Number(val));
+              }}
+            >
+              <option value="전체">전체</option>
+              {themes.map((theme) => (
+                <option key={theme.themeId} value={theme.themeId}>
+                  {theme.themeName}
+                </option>
+              ))}
+            </select>
+          </div>
         </section>
 
         {/* Theme List */}
         <section className="max-w-[1400px] mx-auto px-8 pb-24">
           <div className="flex flex-col gap-12">
-            {themes.map((theme) => (
-              <article
-                key={theme.themeId}
-                className="flex gap-8 border-b pb-10"
-              >
-                {/* 이미지 */}
-                <div className="w-[350px] h-[520px] bg-black overflow-hidden flex-shrink-0">
-                  <img
-                    src={
-                      theme.imageUrl.startsWith("http")
-                        ? theme.imageUrl
-                        : `http://localhost:8080/upload/${theme.imageUrl}`
-                    }
-                    alt={theme.themeName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* 정보 + 시간 */}
-                <div className="flex-1 ml-5">
-                  <h3 className="text-4xl font-bold mb-2">
-                    {theme.themeName}
-                  </h3>
-
-                  <p className="text-xl mb-3 text-gray-900 text-opacity-30">
-                    PLAY TIME · {theme.playTime} MIN
-                  </p>
-
-                  <DifficultyStars level={theme.difficulty} />
-
-                  {/* 시간 버튼 */}
-                  <div className="mt-[100px] flex flex-wrap gap-3">
-                    {availableTimes[theme.themeId]?.length === 0 && (
-                      <span className="text-sm text-neutral-400">
-                        예약 마감
-                      </span>
-                    )}
-
-                    {availableTimes[theme.themeId]?.map((slot) => (
-                      <button
-                        key={slot.timeSlotId}
-                        disabled={slot.reserved}
-                        className={`
-                          min-w-[200px] py-2 text-xl border
-                          ${
-                            slot.reserved
-                              ? "bg-gray-400 text-white cursor-not-allowed"
-                              : "hover:bg-black hover:text-white"
-                          }
-                        `}
-                        onClick={() => {
-                          if (slot.reserved) return;
-
-                          navigate("/reservation/form", {
-                            state: {
-                              theme,
-                              date: formatLocalDate(selectedDate),
-                              timeSlot: slot,
-                            },
-                          });
-                        }}
-                      >
-                        {slot.startTime.slice(0, 5)}
-                      </button>
-                    ))}
+            {themes
+              .filter((theme) =>
+                selectedThemeId === "전체" ? true : theme.themeId === selectedThemeId
+              )
+              .map((theme) => (
+                <article
+                  key={theme.themeId}
+                  className="flex gap-8 border-b pb-10"
+                >
+                  {/* 이미지 */}
+                  <div className="w-[350px] h-[520px] bg-black overflow-hidden flex-shrink-0">
+                    <img
+                      src={
+                        theme.imageUrl.startsWith("http")
+                          ? theme.imageUrl
+                          : `http://localhost:8080/upload/${theme.imageUrl}`
+                      }
+                      alt={theme.themeName}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </div>
-              </article>
-            ))}
+
+                  {/* 정보 + 시간 */}
+                  <div className="flex-1 ml-5">
+                    <h3 className="text-4xl font-bold mb-2">
+                      {theme.themeName}
+                    </h3>
+
+                    <p className="text-xl mb-3 text-gray-900 text-opacity-30">
+                      PLAY TIME · {theme.playTime} MIN
+                    </p>
+
+                    <DifficultyStars level={theme.difficulty} />
+
+                    {/* 시간 버튼 */}
+                    <div className="mt-[100px] flex flex-wrap gap-3">
+                      {availableTimes[theme.themeId]?.length === 0 && (
+                        <span className="text-sm text-neutral-400">
+                          예약 마감
+                        </span>
+                      )}
+
+                      {availableTimes[theme.themeId]?.map((slot) => (
+                        <button
+                          key={slot.timeSlotId}
+                          disabled={slot.reserved}
+                          className={`
+                            min-w-[200px] py-2 text-xl border
+                            ${
+                              slot.reserved
+                                ? "bg-gray-400 text-white cursor-not-allowed"
+                                : "hover:bg-black hover:text-white"
+                            }
+                          `}
+                          onClick={() => {
+                            if (slot.reserved) return;
+
+                            navigate("/reservation/form", {
+                              state: {
+                                theme,
+                                date: formatLocalDate(selectedDate),
+                                timeSlot: slot,
+                              },
+                            });
+                          }}
+                        >
+                          {slot.startTime.slice(0, 5)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              ))}
           </div>
         </section>
       </main>
