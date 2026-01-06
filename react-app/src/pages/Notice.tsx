@@ -170,7 +170,7 @@ const NoticeFAQPage: React.FC = () => {
 
       {/* TAB */}
       <div className="mt-[12rem] flex justify-center mb-16">
-        <div className="flex bg-gray-100 rounded-full p-1 shadow-inner w-[650px] text-xl">
+        <div className="flex bg-gray-100 rounded-full shadow-inner w-[650px] text-xl p-3">
           {["notice", "faq"].map(tab => (
             <button
               key={tab}

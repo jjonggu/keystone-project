@@ -69,7 +69,7 @@ export default function ReservationFormPage(): JSX.Element {
         customerPhone: phone,
         headCount,
         paymentType,
-        captchaToken, // ⭐ 서버로 같이 전송
+        captchaToken,
       });
 
       alert("예약이 완료되었습니다!");

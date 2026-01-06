@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
 import type { Theme } from "../types/theme";
-import { Banner, mainrogo } from "../assets/images/common";
+import { Banner } from "../assets/images/common";
 import api from "../api";
 
 /* 별 난이도 컴포넌트 */
@@ -30,12 +30,7 @@ interface ThemeModalProps {
 }
 
 /* 모달 */
-function ThemeModal({
-  open,
-  onClose,
-  theme,
-  navigate,
-}: ThemeModalProps): JSX.Element | null {
+function ThemeModal({ open, onClose, theme, navigate }: ThemeModalProps): JSX.Element | null {
   if (!open || !theme) return null;
 
   const imgSrc = theme.imageUrl.startsWith("http")
@@ -55,11 +50,7 @@ function ThemeModal({
 
         {/* 이미지 */}
         <div className="w-full sm:w-1/2 aspect-[4/6] overflow-hidden rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none">
-          <img
-            src={imgSrc}
-            alt={theme.themeName}
-            className="w-full h-full object-cover"
-          />
+          <img src={imgSrc} alt={theme.themeName} className="w-full h-full object-cover" />
         </div>
 
         {/* 정보 */}
@@ -81,20 +72,8 @@ function ThemeModal({
           </div>
 
           <button
-            onClick={() =>
-              navigate("/reservation", {
-                state: { theme },
-              })
-            }
-            className="
-              mt-6 py-3 px-6
-              bg-white text-black font-semibold
-              rounded-lg
-              shadow-[0_6px_18px_rgba(0,0,0,0.25)]
-              hover:shadow-[0_10px_25px_rgba(0,0,0,0.35)]
-              hover:bg-neutral-100
-              transition-all duration-300
-            "
+            onClick={() => navigate("/reservation", { state: { theme } })}
+            className="mt-6 py-3 px-6 bg-white text-black font-semibold rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.25)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.35)] hover:bg-neutral-100 transition-all duration-300"
           >
             예약하러 가기
           </button>
@@ -113,6 +92,8 @@ export default function Theme(): JSX.Element {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
 
+  const isAdmin = true; // 임시: 실제로는 로그인/권한 체크 필요
+
   useEffect(() => {
     api.get("/themes").then((res) => {
       setThemes(res.data);
@@ -130,6 +111,26 @@ export default function Theme(): JSX.Element {
     <div className="relative min-h-screen bg-white text-black">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
+{/* 관리자 페이지 버튼 - 오른쪽 상단 고정 */}
+{isAdmin && (
+  <button
+    onClick={() => navigate("/admin/reservations")}
+    className={`
+      fixed top-[61px] right-[55px]
+      text-lg
+      z-[999]
+      py-[20px] px-5
+      bg-white text-black font-semibold rounded-lg shadow
+      transition
+      cursor-pointer
+      hover:bg-neutral-100
+      active:scale-95
+    `}
+  >
+    관리자 페이지
+  </button>
+)}
+
       <ThemeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -139,49 +140,37 @@ export default function Theme(): JSX.Element {
 
       {/* 헤더 */}
       <section className="relative h-screen w-full">
-        <img
-          src={Banner}
-          alt="banner"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        <img src={Banner} alt="banner" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/40" />
 
-        <header className="fixed top-0 left-0 z-50 w-full flex justify-center pt-6 mt-9">
-          <button
-            onClick={() => setMenuOpen((prev) => !prev)}
-            className={`
-              max-w-[1400px] w-full
-              flex items-center space-x-3
-              py-[13px] px-5
-              bg-white rounded-lg shadow-all-xl
-              transition-all duration-300
-              ${menuOpen ? "ml-[350px]" : "ml-0"}
-            `}
+      {/* HEADER */}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center space-x-3 max-w-[1400px] w-full
+            ${menuOpen ? "ml-[350px]" : "ml-0"}`}
+        >
+          <svg
+            className="w-12 h-12 text-gray-900"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={3}
+            viewBox="0 0 24 24"
           >
-            <svg
-              className="w-12 h-12 text-gray-900"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={3}
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 5h16M4 12h16M4 19h16"
-              />
-            </svg>
-
-            <span className="text-4xl font-[1000] text-gray-900">MENU</span>
-          </button>
-        </header>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 5h16M4 12h16M4 19h16"
+            />
+          </svg>
+          <span className="font-[1000] text-gray-900 text-4xl">MENU</span>
+        </button>
+      </header>
 
         <div className="absolute bottom-[100px] left-1/2 -translate-x-1/2">
           <button
             onClick={scrollToThemes}
-            className="w-14 h-14 rounded-full bg-white/40 backdrop-blur-md
-                       flex items-center justify-center shadow-xl
-                       hover:scale-110 transition animate-bounce"
+            className="w-14 h-14 rounded-full bg-white/40 backdrop-blur-md flex items-center justify-center shadow-xl hover:scale-110 transition animate-bounce"
           >
             <span className="text-3xl font-bold">↓</span>
           </button>
@@ -202,11 +191,7 @@ export default function Theme(): JSX.Element {
             >
               <div className="h-[600px] bg-white rounded-3xl border border-neutral-200 shadow-[0_25px_50px_rgba(0,0,0,0.15)] overflow-hidden">
                 <img
-                  src={
-                    theme.imageUrl.startsWith("http")
-                      ? theme.imageUrl
-                      : `http://localhost:8080/upload/${theme.imageUrl}`
-                  }
+                  src={theme.imageUrl.startsWith("http") ? theme.imageUrl : `http://localhost:8080/upload/${theme.imageUrl}`}
                   alt={theme.themeName}
                   className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
                 />
