@@ -377,10 +377,10 @@ export default function NoticeAboutPage() {
         <div className="flex justify-center pb-20">
           <FadeUp>
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/")}
               className="px-10 py-4 rounded-xl bg-black text-white text-2xl font-bold hover:bg-gray-800 transition"
             >
-              ← 돌아가기
+              ← 메인으로
             </button>
           </FadeUp>
         </div>

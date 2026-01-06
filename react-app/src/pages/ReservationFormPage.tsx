@@ -43,7 +43,7 @@ export default function ReservationFormPage(): JSX.Element {
   const [headCount, setHeadCount] = useState<number>(theme.minPerson);
   const [paymentType, setPaymentType] = useState<"CARD" | "CASH">("CARD");
 
-  // ✅ reCAPTCHA state (이게 빠져서 에러났던 것)
+  // reCAPTCHA
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const totalPrice = headCount * theme.pricePerPerson;
@@ -54,7 +54,6 @@ export default function ReservationFormPage(): JSX.Element {
       return;
     }
 
-    // ✅ reCAPTCHA 체크
     if (!captchaToken) {
       alert("로봇이 아님을 확인해주세요.");
       return;
@@ -188,7 +187,7 @@ export default function ReservationFormPage(): JSX.Element {
               <div className="mt-6">
                 <div className="flex justify-center border border-neutral-300 rounded-lg bg-neutral-50 py-4">
                   <ReCAPTCHA
-                    sitekey="여기에_구글_SITE_KEY"
+                    sitekey="6LfQj0AsAAAAABES2KK5wmu_0OuO5cfIFBxQRx4p"
                     onChange={(token) => setCaptchaToken(token)}
                   />
                 </div>

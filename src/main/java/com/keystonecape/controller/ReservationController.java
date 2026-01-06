@@ -6,7 +6,10 @@ import com.keystonecape.entity.TimeSlot;
 import com.keystonecape.repository.ReservationRepository;
 import com.keystonecape.repository.ThemeRepository;
 import com.keystonecape.repository.TimeSlotRepository;
+import com.keystonecape.service.RecaptchaService;
+import com.keystonecape.service.SmsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -23,6 +27,8 @@ public class ReservationController {
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final RecaptchaService recaptchaService;
+    private final SmsService smsService;
 
     @GetMapping("/themes/{themeId}/available-times")
     public List<Map<String, Object>> getAvailableTimes(
@@ -56,6 +62,14 @@ public class ReservationController {
     @PostMapping("/reservations")
     public void createReservation(@RequestBody Map<String, Object> body) {
 
+        // reCAPTCHA 검증
+        String captchaToken = body.get("captchaToken").toString();
+        boolean captchaValid = recaptchaService.verify(captchaToken);
+
+        if (!captchaValid) {
+            throw new RuntimeException("reCAPTCHA 검증 실패");
+        }
+
         Long themeId = Long.valueOf(body.get("themeId").toString());
         Long timeSlotId = Long.valueOf(body.get("timeSlotId").toString());
         LocalDate date = LocalDate.parse(body.get("reservationDate").toString());
@@ -86,6 +100,35 @@ public class ReservationController {
                 .build();
 
         reservationRepository.save(reservation);
+
+        // 저장 후 PK
+        Long reservationId = reservation.getReservationId();
+
+        String toPhone =
+                reservation.getCustomerPhone().replaceAll("-", "");
+
+        System.out.println(">>> 문자 전송 시도 직전");
+
+        // 문자 전송
+        try {
+            smsService.sendReservationSms(
+                    reservationId,
+                    toPhone,
+                    reservation.getCustomerName(),
+                    theme.getThemeName(),
+                    date.toString(),
+                    timeSlot.getStartTime().toString(),
+                    reservation.getHeadCount(),
+                    reservation.getHeadCount() * theme.getPricePerPerson()
+            );
+        } catch (Exception e) {
+            log.error("문자 전송 실패", e);
+            e.printStackTrace();
+        }
+        System.out.println(">>> 문자 전송 호출 끝");
+
+
+
     }
 
 }
