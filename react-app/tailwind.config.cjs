@@ -6,6 +6,7 @@ module.exports = {
       fontFamily: {
         sans: ["GmarketSans", "sans-serif"],
         gmarket: ["GmarketSans", "sans-serif"],
+        title: ['"Cinzel Decorative"', 'serif'],
       },
       colors: {
         // 기존 컬러 유지

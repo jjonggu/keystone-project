@@ -6,15 +6,12 @@ import api from "../api";
 import type { Theme } from "../types/theme";
 import type { TimeSlot } from "../types/timeSlot";
 
-/* 난이도 별 */
+/* 난이도 */
 function DifficultyStars({ level }: { level: number }) {
   return (
     <span className="flex gap-[2px] text-xl">
       {Array.from({ length: 5 }).map((_, i) => (
-        <span
-          key={i}
-          className={i < level ? "text-black" : "text-neutral-300"}
-        >
+        <span key={i} className={i < level ? "text-black" : "text-neutral-300"}>
           ★
         </span>
       ))}
@@ -34,28 +31,20 @@ export default function ThemePage(): JSX.Element {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [themes, setThemes] = useState<Theme[]>([]);
-
-  /** 캘린더 상태 */
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedThemeId, setSelectedThemeId] =
+    useState<number | "전체">("전체");
 
-  /** 선택된 테마 ID */
-  const [selectedThemeId, setSelectedThemeId] = useState<number | "전체">("전체");
-
-  /** 테마별 예약 가능 시간 */
   const [availableTimes, setAvailableTimes] = useState<{
     [themeId: number]: TimeSlot[];
   }>({});
 
-  /* 테마 목록 */
   useEffect(() => {
     api.get("/themes").then((res) => setThemes(res.data));
   }, []);
 
-  /* 날짜 변경 시 예약 가능 시간 조회 */
   useEffect(() => {
     const dateStr = formatLocalDate(selectedDate);
-
     themes.forEach((theme) => {
       api
         .get(`/themes/${theme.themeId}/available-times`, {
@@ -70,18 +59,11 @@ export default function ThemePage(): JSX.Element {
     });
   }, [themes, selectedDate]);
 
-  /* 캘린더 닫기 이벤트 */
-  useEffect(() => {
-    const close = () => setCalendarOpen(false);
-    window.addEventListener("calendar-close", close);
-    return () => window.removeEventListener("calendar-close", close);
-  }, []);
-
   return (
     <div className="relative min-h-screen bg-white text-black">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      {/* 메뉴 버튼 */}
+      {/* MENU 버튼 */}
       <header className="fixed top-0 left-0 z-50 w-full flex justify-center pt-6 mt-9">
         <button
           onClick={() => setMenuOpen((p) => !p)}
@@ -95,149 +77,131 @@ export default function ThemePage(): JSX.Element {
           `}
         >
           <svg
-            className="w-12 h-12 text-gray-900"
+            className="w-12 h-12"
             fill="none"
             stroke="currentColor"
             strokeWidth={3}
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 5h16M4 12h16M4 19h16"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16" />
           </svg>
           <span className="text-4xl font-[1000]">MENU</span>
         </button>
       </header>
 
-      <main
-        className={`transition-all duration-300 ${
-          menuOpen ? "ml-[350px]" : "ml-0"
-        }`}
-      >
-        {/* Hero */}
-        <section className="pt-22 mt-[10rem]">
+      <main className={`transition-all duration-300 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
+        {/* 타이틀 */}
+        <section className="mt-[8rem]">
           <div className="h-[200px] flex justify-center items-center">
-            <h2 className="text-6xl font-bold tracking-[0.4em]">
+            <h2 className="text-4xl md:text-6xl tracking-[0.3em] font-bold">
               RESERVATION
             </h2>
           </div>
         </section>
 
-        {/* 날짜 + 테마 선택 */}
-        <section className="flex ml-[17.5rem] mb-[40px] gap-6 items-start">
-          {/* 날짜 박스 */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="calendar"
-              className="mb-2 text-sm font-semibold text-gray-700"
-            >
-              날짜 선택
-            </label>
-            <Calendar
-              selectedDate={selectedDate}
-              onSelectDate={(date) => setSelectedDate(date)}
-              id="calendar"
-              className="text-base"
-            />
-          </div>
+        {/* ✅ 필터 영역 (목록이랑 같은 컨테이너) */}
+        <section className="max-w-[1400px] mx-auto px-6 lg:px-8 mb-12">
+          <div
+            className="
+              flex flex-col lg:flex-row
+              gap-6
+              items-start lg:items-end
+            "
+          >
+            {/* 날짜 */}
+            <div className="w-full lg:w-auto flex flex-col">
+              <label className="mb-2 text-sm font-semibold">날짜 선택</label>
+              <Calendar
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
+                className="h-[42px]"
+              />
+            </div>
 
-          {/* 테마 선택 드롭다운 */}
-          <div className="w-[200px] flex flex-col">
-            <label
-              htmlFor="theme"
-              className="mb-2 text-sm font-semibold text-gray-700"
-            >
-              테마 선택
-            </label>
-            <select
-              id="theme"
-              className="w-full border rounded px-3 py-2 text-base bg-white"
-              value={selectedThemeId}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSelectedThemeId(val === "전체" ? "전체" : Number(val));
-              }}
-            >
-              <option value="전체">전체</option>
-              {themes.map((theme) => (
-                <option key={theme.themeId} value={theme.themeId}>
-                  {theme.themeName}
-                </option>
-              ))}
-            </select>
+            {/* 테마 */}
+            <div className="w-full lg:w-[200px] flex flex-col">
+              <label className="mb-2 text-sm font-semibold">테마 선택</label>
+              <select
+                className="h-[42px] border rounded px-3"
+                value={selectedThemeId}
+                onChange={(e) =>
+                  setSelectedThemeId(
+                    e.target.value === "전체" ? "전체" : Number(e.target.value)
+                  )
+                }
+              >
+                <option value="전체">전체</option>
+                {themes.map((t) => (
+                  <option key={t.themeId} value={t.themeId}>
+                    {t.themeName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 조회 */}
+            <div className="w-full lg:w-[200px] flex flex-col lg:ml-auto lg:mr-[-30px]">
+              <label className="mb-2 opacity-0">조회</label>
+              <button className="h-[42px] border rounded hover:bg-black hover:text-white">
+                예약 조회 / 취소
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* Theme List */}
-        <section className="max-w-[1400px] mx-auto px-8 pb-24">
-          <div className="flex flex-col gap-12">
+        {/* 목록 */}
+        <section className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-24">
+          <div className="flex flex-col gap-16">
             {themes
-              .filter((theme) =>
-                selectedThemeId === "전체" ? true : theme.themeId === selectedThemeId
+              .filter((t) =>
+                selectedThemeId === "전체"
+                  ? true
+                  : t.themeId === selectedThemeId
               )
               .map((theme) => (
                 <article
                   key={theme.themeId}
-                  className="flex gap-8 border-b pb-10"
+                  className="flex flex-col lg:flex-row gap-8 border-b pb-12"
                 >
-                  {/* 이미지 */}
-                  <div className="w-[350px] h-[520px] bg-black overflow-hidden flex-shrink-0">
+                  <div className="w-full lg:w-[350px] h-[360px] lg:h-[520px] bg-black">
                     <img
                       src={
                         theme.imageUrl.startsWith("http")
                           ? theme.imageUrl
                           : `http://localhost:8080/upload/${theme.imageUrl}`
                       }
-                      alt={theme.themeName}
                       className="w-full h-full object-cover"
                     />
                   </div>
 
-                  {/* 정보 + 시간 */}
-                  <div className="flex-1 ml-5">
-                    <h3 className="text-4xl font-bold mb-2">
+                  <div className="flex-1">
+                    <h3 className="text-3xl lg:text-4xl font-bold mb-2">
                       {theme.themeName}
                     </h3>
-
-                    <p className="text-xl mb-3 text-gray-900 text-opacity-30">
+                    <p className="text-gray-400 mb-3">
                       PLAY TIME · {theme.playTime} MIN
                     </p>
-
                     <DifficultyStars level={theme.difficulty} />
 
-                    {/* 시간 버튼 */}
-                    <div className="mt-[100px] flex flex-wrap gap-3">
-                      {availableTimes[theme.themeId]?.length === 0 && (
-                        <span className="text-sm text-neutral-400">
-                          예약 마감
-                        </span>
-                      )}
-
+                    <div className="mt-10 flex flex-wrap gap-3">
                       {availableTimes[theme.themeId]?.map((slot) => (
                         <button
                           key={slot.timeSlotId}
                           disabled={slot.reserved}
-                          className={`
-                            min-w-[200px] py-2 text-xl border
-                            ${
-                              slot.reserved
-                                ? "bg-gray-400 text-white cursor-not-allowed"
-                                : "hover:bg-black hover:text-white"
-                            }
-                          `}
-                          onClick={() => {
-                            if (slot.reserved) return;
-
+                          className={`min-w-[160px] lg:min-w-[200px] py-2 border ${
+                            slot.reserved
+                              ? "bg-gray-400 text-white"
+                              : "hover:bg-black hover:text-white"
+                          }`}
+                          onClick={() =>
                             navigate("/reservation/form", {
                               state: {
                                 theme,
                                 date: formatLocalDate(selectedDate),
                                 timeSlot: slot,
                               },
-                            });
-                          }}
+                            })
+                          }
                         >
                           {slot.startTime.slice(0, 5)}
                         </button>

@@ -5,7 +5,6 @@ import type { Theme } from "../types/theme";
 import { Banner } from "../assets/images/common";
 import api from "../api";
 
-/* 별 난이도 컴포넌트 */
 function DifficultyStars({ level }: { level: number }) {
   return (
     <span className="flex items-center gap-1">
@@ -111,26 +110,6 @@ export default function Theme(): JSX.Element {
     <div className="relative min-h-screen bg-white text-black">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-{/* 관리자 페이지 버튼 - 오른쪽 상단 고정 */}
-{isAdmin && (
-  <button
-    onClick={() => navigate("/admin/reservations")}
-    className={`
-      fixed top-[61px] right-[55px]
-      text-lg
-      z-[999]
-      py-[20px] px-5
-      bg-white text-black font-semibold rounded-lg shadow
-      transition
-      cursor-pointer
-      hover:bg-neutral-100
-      active:scale-95
-    `}
-  >
-    관리자 페이지
-  </button>
-)}
-
       <ThemeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -143,29 +122,55 @@ export default function Theme(): JSX.Element {
         <img src={Banner} alt="banner" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/40" />
 
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center space-x-3 max-w-[1400px] w-full
-            ${menuOpen ? "ml-[350px]" : "ml-0"}`}
-        >
-          <svg
-            className="w-12 h-12 text-gray-900"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={3}
-            viewBox="0 0 24 24"
+        {/* HEADER */}
+        <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
+          <div
+            className={`
+              transition-all duration-300
+              py-[13px] px-5
+              bg-white rounded-lg shadow-all-xl
+              flex items-center
+              max-w-[1400px] w-full
+              ${menuOpen ? "ml-[350px]" : "ml-0"}
+            `}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 5h16M4 12h16M4 19h16"
-            />
-          </svg>
-          <span className="font-[1000] text-gray-900 text-4xl">MENU</span>
-        </button>
-      </header>
+            {/* MENU 버튼 */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center space-x-3"
+            >
+              <svg
+                className="w-12 h-12 text-gray-900"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16" />
+              </svg>
+              <span className="font-[1000] text-gray-900 text-4xl">MENU</span>
+            </button>
+
+            {/* 관리자 버튼 (여기만 추가) */}
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin/reservations")}
+                className="
+                  ml-auto
+                  px-6 py-3
+                  text-sm font-semibold
+                  border border-gray
+                  rounded-full
+                  hover:bg-black hover:text-white
+                  transition
+                "
+              >
+                관리자 페이지
+              </button>
+            )}
+          </div>
+        </header>
+
 
         <div className="absolute bottom-[100px] left-1/2 -translate-x-1/2">
           <button
