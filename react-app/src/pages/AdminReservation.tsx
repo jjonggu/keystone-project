@@ -7,15 +7,13 @@ import type { Reservation } from "../types/reservation";
 
 // 상태 매핑
 export const STATUS_MAP: Record<string, string> = {
-  PENDING: "대기",
+  WAIT: "대기",
   CONFIRMED: "결제 완료",
-  CANCELED: "취소",
 };
 
 export const STATUS_OPTIONS = [
-  { value: "PENDING", label: "대기" },
+  { value: "WAIT", label: "대기" },
   { value: "CONFIRMED", label: "결제 완료" },
-  { value: "CANCELED", label: "취소" },
 ];
 
 const AdminReservationPage: React.FC = () => {
@@ -84,24 +82,6 @@ const AdminReservationPage: React.FC = () => {
     <div className="min-h-screen bg-white px-4 sm:px-6 pb-24">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
-            ${menuOpen ? "ml-[350px]" : "ml-0"}`}
-        >
-          <svg
-            className="w-12 h-12 text-gray-900"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={3}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16" />
-          </svg>
-          <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
-        </button>
-      </header>
 
       {/* ===== CONTENT ===== */}
       <main
