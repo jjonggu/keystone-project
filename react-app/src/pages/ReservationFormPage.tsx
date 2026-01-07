@@ -81,8 +81,9 @@ export default function ReservationFormPage(): JSX.Element {
       setAlertType("success");
       setAlertMessage("예약이 완료되었습니다.");
 
-      setTimeout(() => navigate("/"), 7000);
-
+      setTimeout(() => {
+        navigate("/");
+      }, 7000);
     } catch (error) {
       console.error(error);
       setAlertType("error");
@@ -249,13 +250,18 @@ export default function ReservationFormPage(): JSX.Element {
         </p>
 
         <button
-            onClick={() => {
-                setAlertMessage(null);
-                navigate("/")}}
-            className="w-full py-3 bg-black text-white rounded-lg hover:bg-neutral-800 transition"
+          onClick={() => {
+            setAlertMessage(null);
+
+            if (alertType === "success") {
+              navigate("/");
+            }
+          }}
+          className="w-full py-3 bg-black text-white rounded-lg"
         >
-        확인
+          확인
         </button>
+
         </div>
         </div>
         )}
