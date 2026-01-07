@@ -4,11 +4,12 @@ import com.keystonecape.dto.AdminReservation;
 import com.keystonecape.entity.Reservation;
 import com.keystonecape.repository.ReservationRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,5 +35,29 @@ public class ReservationAdminController {
                         r.getReservationStatus()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @PutMapping("/reservations/{id}")
+    public ResponseEntity<String> updateReservation(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body
+    ) {
+        Optional<Reservation> optional = reservationRepository.findById(id);
+        if (optional.isEmpty()) return ResponseEntity.notFound().build();
+
+        Reservation r = optional.get();
+
+        if(body.containsKey("reservationStatus")) {
+            r.setReservationStatus((String)body.get("reservationStatus"));
+        }
+        if(body.containsKey("headCount")) {
+            Object head = body.get("headCount");
+            if(head instanceof Number) {
+                r.setHeadCount(((Number) head).intValue());
+            }
+        }
+
+        reservationRepository.save(r);
+        return ResponseEntity.ok("예약 업데이트 완료");
     }
 }
