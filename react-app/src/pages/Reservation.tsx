@@ -142,7 +142,8 @@ export default function ThemePage(): JSX.Element {
             {/* 조회 */}
             <div className="w-full lg:w-[200px] flex flex-col lg:ml-auto lg:mr-[-30px]">
               <label className="mb-2 opacity-0">조회</label>
-              <button className="h-[42px] border rounded hover:bg-black hover:text-white">
+              <button className="h-[42px] border rounded hover:bg-black hover:text-white"
+                      onClick={()=> navigate("/confirm")}>
                 예약 조회 / 취소
               </button>
             </div>

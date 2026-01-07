@@ -18,6 +18,9 @@ export default function ReservationFormPage(): JSX.Element {
 
   /* MENU 상태 */
   const [menuOpen, setMenuOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
+
 
   /* 새로고침 / 잘못된 접근 방어 */
   if (!location.state) {
@@ -41,21 +44,25 @@ export default function ReservationFormPage(): JSX.Element {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [headCount, setHeadCount] = useState<number>(theme.minPerson);
-  const [paymentType, setPaymentType] = useState<"CARD" | "CASH">("CARD");
+  const [paymentType, setPaymentType] = useState<"CARD" | "CASH">("CASH");
 
   // reCAPTCHA
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const totalPrice = headCount * theme.pricePerPerson;
+  const MAX_PERSON = 7;
 
-  const submitReservation = async () => {
+
+  const submitReservation = async (): Promise<void> => {
     if (!name.trim() || !phone.trim()) {
-      alert("이름과 전화번호를 입력해주세요.");
+      setAlertType("error");
+      setAlertMessage("이름과 전화번호를 입력해주세요.");
       return;
     }
 
     if (!captchaToken) {
-      alert("로봇이 아님을 확인해주세요.");
+      setAlertType("error");
+      setAlertMessage("로봇이 아님을 확인해주세요.");
       return;
     }
 
@@ -71,11 +78,15 @@ export default function ReservationFormPage(): JSX.Element {
         captchaToken,
       });
 
-      alert("예약이 완료되었습니다!");
-      navigate("/");
-    } catch (e) {
-      alert("예약 중 오류가 발생했습니다.");
-      console.error(e);
+      setAlertType("success");
+      setAlertMessage("예약이 완료되었습니다.");
+
+      setTimeout(() => navigate("/"), 7000);
+
+    } catch (error) {
+      console.error(error);
+      setAlertType("error");
+      setAlertMessage("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -168,14 +179,17 @@ export default function ReservationFormPage(): JSX.Element {
                   value={headCount}
                   onChange={(e) => setHeadCount(Number(e.target.value))}
                 >
-                  {Array.from({ length: 10 }).map((_, i) => {
-                    const count = i + theme.minPerson;
-                    return (
-                      <option key={count} value={count}>
-                        {count}명
-                      </option>
-                    );
-                  })}
+                  {Array.from(
+                      { length: MAX_PERSON - theme.minPerson + 1 },
+                      (_, i) => {
+                        const count = theme.minPerson + i;
+                        return (
+                          <option key={count} value={count}>
+                            {count}명
+                          </option>
+                        );
+                      }
+                    )}
                 </select>
               </div>
 
@@ -216,6 +230,35 @@ export default function ReservationFormPage(): JSX.Element {
         </div>
       </main>
 
+        {/* 커스텀 알림 모달 */}
+      {alertMessage && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40">
+        <div className="bg-white rounded-2xl px-10 py-8 w-[380px] text-center shadow-2xl animate-fadeIn">
+        <h3
+            className={`text-2xl font-bold mb-4 ${
+            alertType === "success"
+            ? "text-black"
+            : "text-red-600"
+            }`}
+            >
+            {alertType === "success" ? "알림" : "오류"}
+            </h3>
+
+        <p className="text-neutral-700 mb-6 leading-relaxed">
+            {alertMessage}
+        </p>
+
+        <button
+            onClick={() => {
+                setAlertMessage(null);
+                navigate("/")}}
+            className="w-full py-3 bg-black text-white rounded-lg hover:bg-neutral-800 transition"
+        >
+        확인
+        </button>
+        </div>
+        </div>
+        )}
       <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
         <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
         <p className="mt-3">PRIVATE UI CLONE</p>

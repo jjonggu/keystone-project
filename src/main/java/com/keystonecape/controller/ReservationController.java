@@ -1,5 +1,6 @@
 package com.keystonecape.controller;
 
+import com.keystonecape.dto.RefundAccountRequest;
 import com.keystonecape.entity.Reservation;
 import com.keystonecape.entity.Theme;
 import com.keystonecape.entity.TimeSlot;
@@ -7,6 +8,7 @@ import com.keystonecape.repository.ReservationRepository;
 import com.keystonecape.repository.ThemeRepository;
 import com.keystonecape.repository.TimeSlotRepository;
 import com.keystonecape.service.RecaptchaService;
+import com.keystonecape.service.ReservationService;
 import com.keystonecape.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,8 @@ public class ReservationController {
     private final TimeSlotRepository timeSlotRepository;
     private final RecaptchaService recaptchaService;
     private final SmsService smsService;
+    private final ReservationService reservationService;
+
 
     @GetMapping("/themes/{themeId}/available-times")
     public List<Map<String, Object>> getAvailableTimes(
@@ -96,7 +100,7 @@ public class ReservationController {
                 .customerPhone(body.get("customerPhone").toString())
                 .headCount(Integer.parseInt(body.get("headCount").toString()))
                 .paymentType(body.get("paymentType").toString())
-                .reservationStatus("CONFIRMED")
+                .reservationStatus("WAIT")
                 .build();
 
         reservationRepository.save(reservation);
@@ -130,6 +134,48 @@ public class ReservationController {
 
 
     }
+    //예약 조회
+
+    @GetMapping("/reservations/confirm")
+    public Map<String, Object> confirmReservation(
+            @RequestParam Long reservationId,
+            @RequestParam String name,
+            @RequestParam String phone
+    ) {
+        Reservation r = reservationService.confirm(reservationId, name, phone);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("reservationId", r.getReservationId());
+        result.put("reservationDate", r.getReservationDate());
+        result.put("customerName", r.getCustomerName());
+        result.put("customerPhone", r.getCustomerPhone());
+        result.put("headCount", r.getHeadCount());
+        result.put("paymentType", r.getPaymentType());
+        result.put("reservationStatus", r.getReservationStatus());
+        result.put("themeName", r.getTheme().getThemeName());
+        result.put("startTime", r.getTimeSlot().getStartTime().toString());
+
+        return result;
+    }
+
+    @PostMapping("/reservations/{id}/cancel")
+    public Long cancelReservation(@PathVariable Long id) {
+        return reservationService.cancelOnly(id);
+    }
+
+    @PutMapping("/reservations/cancel/{cancelId}/refund")
+    public void saveRefundAccount(
+            @PathVariable Long cancelId,
+            @RequestBody RefundAccountRequest request
+    ) {
+        reservationService.saveRefundAccount(cancelId, request);
+    }
+
+
+
+
+
+
 
 }
 

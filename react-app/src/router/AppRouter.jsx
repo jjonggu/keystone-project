@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Main from "../pages/Main";
 import Reservation from "../pages/Reservation";
 import ReservationFormPage from "../pages/ReservationFormPage";
+import Confirm from "../pages/Confirm";
 import Map from "../pages/Map";
 import About from "../pages/About";
 import Notice from "../pages/Notice";
@@ -35,6 +36,9 @@ export default function AppRouter() {
 
         {/* 예약 관리자 페이지 */}
         <Route path="/admin/reservations" element={<AdminReservation />} />
+
+        {/* 예약 확인 */}
+        <Route path="/confirm" element={<Confirm />} />
       </Routes>
     </BrowserRouter>
   );
