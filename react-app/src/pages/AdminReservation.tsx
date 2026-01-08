@@ -1,5 +1,5 @@
 // src/pages/AdminReservationPage.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FaRocket } from "react-icons/fa";
 import Menubar from "../components/ui/Menubar";
 import api from "../api";
@@ -32,56 +32,86 @@ const AdminReservationPage: React.FC = () => {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
-  useEffect(() => {
-    api
-      .get<Reservation[]>("/admin/reservations", {
-        headers: { "X-ADMIN-KEY": "keystone-admin-secret-123" },
-      })
-      .then((res) => {
-        setReservations(res.data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  // ✅ StrictMode / 중복 렌더 방지
+   const fetchedRef = useRef(false);
 
-  // ✅ 예약 상태 및 인원 업데이트
-  const handleUpdateReservation = async () => {
-    if (!selectedReservation) return;
-    try {
-      await api.put(
-        `/admin/reservations/${selectedReservation.reservationId}`,
-        {
+    useEffect(() => {
+      if (fetchedRef.current) return;
+      fetchedRef.current = true;
+
+      api
+        .get<Reservation[]>("/admin/reservations")
+        .then((res) => {
+          setReservations(res.data);
+        })
+        .catch((err) => {
+          console.error("예약 조회 실패", err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, []);
+
+    const handleUpdateReservation = async () => {
+      if (!selectedReservation) return;
+
+      try {
+        await api.put(`/admin/reservations/${selectedReservation.reservationId}`, {
           reservationStatus: selectedReservation.reservationStatus,
           headCount: selectedReservation.headCount,
-        },
-        { headers: { "X-ADMIN-KEY": "keystone-admin-secret-123" } }
-      );
+        });
 
-      alert("예약 정보 업데이트 완료");
-      setDetailModalOpen(false);
+        alert("예약 정보 업데이트 완료");
+        setDetailModalOpen(false);
 
-      // 테이블에도 바로 반영
-      setReservations((prev) =>
-        prev.map((r) =>
-          r.reservationId === selectedReservation.reservationId
-            ? {
-                ...r,
-                reservationStatus: selectedReservation.reservationStatus,
-                headCount: selectedReservation.headCount,
-              }
-            : r
-        )
-      );
-    } catch (err) {
-      console.error(err);
-      alert("업데이트 실패");
-    }
-  };
+        setReservations((prev) =>
+          prev.map((r) =>
+            r.reservationId === selectedReservation.reservationId
+              ? { ...r, ...selectedReservation }
+              : r
+          )
+        );
+      } catch (err) {
+        console.error(err);
+        alert("업데이트 실패");
+      }
+    };
 
   return (
     <div className="min-h-screen bg-white px-4 sm:px-6 pb-24">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
+      {/* MENU 헤더 */}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`
+            transition-all duration-300
+            py-[13px] px-5
+            bg-white rounded-lg shadow-all-xl
+            flex items-center space-x-3
+            max-w-[1400px] w-full
+            ${menuOpen ? "ml-[350px]" : "ml-0"}
+          `}
+        >
+          <svg
+            className="w-12 h-12 text-gray-900"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={3}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 5h16M4 12h16M4 19h16"
+            />
+          </svg>
+          <span className="font-[1000] text-gray-900 text-4xl mb-1">
+            MENU
+          </span>
+        </button>
+      </header>
 
       {/* ===== CONTENT ===== */}
       <main

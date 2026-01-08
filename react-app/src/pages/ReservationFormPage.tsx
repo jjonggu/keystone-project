@@ -14,16 +14,20 @@ interface LocationState {
 
 export default function ReservationFormPage(): JSX.Element {
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); // ✅ 딱 한 번만
+
+  /* location.state 고정 */
+  const [reservationState] = useState<LocationState | null>(
+    location.state as LocationState | null
+  );
 
   /* MENU 상태 */
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "error">("success");
 
-
   /* 새로고침 / 잘못된 접근 방어 */
-  if (!location.state) {
+  if (!reservationState) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -39,7 +43,7 @@ export default function ReservationFormPage(): JSX.Element {
     );
   }
 
-  const { theme, date, timeSlot } = location.state as LocationState;
+  const { theme, date, timeSlot } = reservationState;
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -51,7 +55,6 @@ export default function ReservationFormPage(): JSX.Element {
 
   const totalPrice = headCount * theme.pricePerPerson;
   const MAX_PERSON = 7;
-
 
   const submitReservation = async (): Promise<void> => {
     if (!name.trim() || !phone.trim()) {
@@ -81,9 +84,6 @@ export default function ReservationFormPage(): JSX.Element {
       setAlertType("success");
       setAlertMessage("예약이 완료되었습니다.");
 
-      setTimeout(() => {
-        navigate("/");
-      }, 7000);
     } catch (error) {
       console.error(error);
       setAlertType("error");
@@ -135,7 +135,7 @@ export default function ReservationFormPage(): JSX.Element {
         `}
       >
         <div className="flex w-[900px] bg-white rounded-2xl shadow-xl overflow-hidden mt-[120px]">
-          {/* 왼쪽 - 테마 이미지 */}
+          {/* 왼쪽 */}
           <div className="w-1/2 bg-black">
             <img
               src={
@@ -148,7 +148,7 @@ export default function ReservationFormPage(): JSX.Element {
             />
           </div>
 
-          {/* 오른쪽 - 예약 폼 */}
+          {/* 오른쪽 */}
           <div className="w-1/2 p-8">
             <h2 className="text-2xl font-bold mb-6">예약 정보 입력</h2>
 
@@ -181,16 +181,16 @@ export default function ReservationFormPage(): JSX.Element {
                   onChange={(e) => setHeadCount(Number(e.target.value))}
                 >
                   {Array.from(
-                      { length: MAX_PERSON - theme.minPerson + 1 },
-                      (_, i) => {
-                        const count = theme.minPerson + i;
-                        return (
-                          <option key={count} value={count}>
-                            {count}명
-                          </option>
-                        );
-                      }
-                    )}
+                    { length: MAX_PERSON - theme.minPerson + 1 },
+                    (_, i) => {
+                      const count = theme.minPerson + i;
+                      return (
+                        <option key={count} value={count}>
+                          {count}명
+                        </option>
+                      );
+                    }
+                  )}
                 </select>
               </div>
 
@@ -201,17 +201,18 @@ export default function ReservationFormPage(): JSX.Element {
               {/* reCAPTCHA */}
               <div className="mt-6">
                 <div className="flex justify-center border border-neutral-300 rounded-lg bg-neutral-50 py-4">
+
                   <ReCAPTCHA
                     sitekey="6LfQj0AsAAAAABES2KK5wmu_0OuO5cfIFBxQRx4p"
-                    onChange={(token) => setCaptchaToken(token)}
+                    onChange={(token) => {
+                      if (token) {
+                        setCaptchaToken(token);
+                      }
+                    }}
+                    onExpired={() => setCaptchaToken(null)}
                   />
-                </div>
 
-                {!captchaToken && (
-                  <p className="text-xs text-red-500 text-center mt-2">
-                    예약을 진행하려면 로봇이 아님을 확인해주세요.
-                  </p>
-                )}
+                </div>
               </div>
 
               <button
@@ -219,9 +220,11 @@ export default function ReservationFormPage(): JSX.Element {
                 disabled={!captchaToken}
                 className={`
                   w-full py-3 rounded mt-4 transition-all
-                  ${captchaToken
-                    ? "bg-black text-white hover:bg-neutral-800"
-                    : "bg-neutral-300 text-neutral-500 cursor-not-allowed"}
+                  ${
+                    captchaToken
+                      ? "bg-black text-white hover:bg-neutral-800"
+                      : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+                  }
                 `}
               >
                 예약하기
@@ -231,40 +234,35 @@ export default function ReservationFormPage(): JSX.Element {
         </div>
       </main>
 
-        {/* 커스텀 알림 모달 */}
+      {/* 알림 모달 */}
       {alertMessage && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40">
-        <div className="bg-white rounded-2xl px-10 py-8 w-[380px] text-center shadow-2xl animate-fadeIn">
-        <h3
-            className={`text-2xl font-bold mb-4 ${
-            alertType === "success"
-            ? "text-black"
-            : "text-red-600"
-            }`}
+          <div className="bg-white rounded-2xl px-10 py-8 w-[380px] text-center shadow-2xl">
+            <h3
+              className={`text-2xl font-bold mb-4 ${
+                alertType === "success" ? "text-black" : "text-red-600"
+              }`}
             >
-            {alertType === "success" ? "알림" : "오류"}
+              {alertType === "success" ? "알림" : "오류"}
             </h3>
 
-        <p className="text-neutral-700 mb-6 leading-relaxed">
-            {alertMessage}
-        </p>
+            <p className="text-neutral-700 mb-6">{alertMessage}</p>
 
-        <button
-          onClick={() => {
-            setAlertMessage(null);
-
-            if (alertType === "success") {
-              navigate("/");
-            }
-          }}
-          className="w-full py-3 bg-black text-white rounded-lg"
-        >
-          확인
-        </button>
-
+            <button
+              onClick={() => {
+                setAlertMessage(null);
+                if (alertType === "success") {
+                  navigate("/");
+                }
+              }}
+              className="w-full py-3 bg-black text-white rounded-lg"
+            >
+              확인
+            </button>
+          </div>
         </div>
-        </div>
-        )}
+      )}
+
       <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
         <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
         <p className="mt-3">PRIVATE UI CLONE</p>

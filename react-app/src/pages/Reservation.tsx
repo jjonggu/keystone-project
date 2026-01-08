@@ -99,56 +99,66 @@ export default function ThemePage(): JSX.Element {
           </div>
         </section>
 
-        {/* ✅ 필터 영역 (목록이랑 같은 컨테이너) */}
+        {/* 필터 영역 */}
         <section className="max-w-[1400px] mx-auto px-6 lg:px-8 mb-12">
-          <div
-            className="
-              flex flex-col lg:flex-row
-              gap-6
-              items-start lg:items-end
-            "
-          >
-            {/* 날짜 */}
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+            {/* 날짜 선택 */}
             <div className="w-full lg:w-auto flex flex-col">
               <label className="mb-2 text-sm font-semibold">날짜 선택</label>
-              <Calendar
-                selectedDate={selectedDate}
-                onSelectDate={setSelectedDate}
-                className="h-[42px]"
-              />
+
+              {/* 입력 wrapper */}
+              <div className="h-[42px] flex items-center">
+                <Calendar
+                  selectedDate={selectedDate}
+                  onSelectDate={setSelectedDate}
+                  className="w-full h-full"
+                />
+              </div>
             </div>
 
-            {/* 테마 */}
+            {/* 테마 선택 */}
             <div className="w-full lg:w-[200px] flex flex-col">
               <label className="mb-2 text-sm font-semibold">테마 선택</label>
-              <select
-                className="h-[42px] border rounded px-3"
-                value={selectedThemeId}
-                onChange={(e) =>
-                  setSelectedThemeId(
-                    e.target.value === "전체" ? "전체" : Number(e.target.value)
-                  )
-                }
-              >
-                <option value="전체">전체</option>
-                {themes.map((t) => (
-                  <option key={t.themeId} value={t.themeId}>
-                    {t.themeName}
-                  </option>
-                ))}
-              </select>
+
+              {/* 입력 wrapper */}
+              <div className="h-[42px] flex items-center">
+                <select
+                  className="w-full h-full border rounded px-3"
+                  value={selectedThemeId}
+                  onChange={(e) =>
+                    setSelectedThemeId(
+                      e.target.value === "전체" ? "전체" : Number(e.target.value)
+                    )
+                  }
+                >
+                  <option value="전체">전체</option>
+                  {themes.map((t) => (
+                    <option key={t.themeId} value={t.themeId}>
+                      {t.themeName}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* 조회 */}
-            <div className="w-full lg:w-[200px] flex flex-col lg:ml-auto lg:mr-[-30px]">
+            {/* 예약 조회 */}
+            <div className="w-full lg:w-[200px] flex flex-col lg:ml-auto">
               <label className="mb-2 opacity-0">조회</label>
-              <button className="h-[42px] border rounded hover:bg-black hover:text-white"
-                      onClick={()=> navigate("/confirm")}>
-                예약 조회 / 취소
-              </button>
+
+              <div className="h-[42px] flex items-center">
+                <button
+                  className="w-full h-full border rounded hover:bg-black hover:text-white"
+                  onClick={() => navigate("/confirm")}
+                >
+                  예약 조회 / 취소
+                </button>
+              </div>
             </div>
+
           </div>
         </section>
+
 
         {/* 목록 */}
         <section className="max-w-[1400px] mx-auto px-6 lg:px-8 pb-24">
