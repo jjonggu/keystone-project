@@ -27,6 +27,8 @@ public class ReservationCancel {
 
     private LocalTime startTime;
 
+    private LocalTime endTime;
+
     private String customerName;
 
     private String customerPhone;
@@ -40,4 +42,9 @@ public class ReservationCancel {
     private String refundAccount;
 
     private LocalDateTime cancelledAt;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private String reservationStatus = "CANCELLED"; // 기본값 CANCELLED
+
 }

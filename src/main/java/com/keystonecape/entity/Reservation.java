@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.Id;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -38,4 +39,13 @@ public class Reservation {
 
     private String paymentType;
     private String reservationStatus;
+
+    @Column(nullable = true)
+    private String refundBank;
+
+    @Column(nullable = true)
+    private String refundAccount;
+
+    private LocalDateTime cancelledAt;
+
 }

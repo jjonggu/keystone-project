@@ -1,6 +1,7 @@
 package com.keystonecape.entity;
 
 import com.keystonecape.entity.enumtype.NoticeType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class Notice {
     @Column(name = "notice_type", nullable = false)
     private NoticeType noticeType;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "notice_date", nullable = false)
     private LocalDate noticeDate;
 }
