@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Noticeimg from "../assets/images/noticeimg.png";
 import Key1 from "../assets/images/key1.png";
 import Key2 from "../assets/images/key2.png";
+import { FaRocket } from "react-icons/fa";
+
 
 // 공통 애니메이션 컴포넌트
 function FadeUp({ children, delay = 0 }) {
@@ -384,6 +386,18 @@ export default function NoticeAboutPage() {
             </button>
           </FadeUp>
         </div>
+      </div>
+      {/* QUICK RESERVATION */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <button
+          onClick={() => (window.location.href = "/reservation")}
+          className="w-36 h-36 rounded-full bg-black text-white font-bold text-lg shadow-2xl
+                     flex flex-col items-center justify-center
+                     transition-all duration-300 hover:scale-110 active:scale-95 group"
+        >
+          <FaRocket className="text-4xl mb-2 animate-bounce group-hover:text-yellow-400 transition-colors" />
+          빠른 예약
+        </button>
       </div>
     </div>
   );
