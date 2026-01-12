@@ -226,11 +226,11 @@ const AdminReservationPage: React.FC = () => {
                     className="group hover:bg-gray-50/80 transition-colors cursor-pointer"
                     onClick={() => { setSelectedReservation(r); setDetailModalOpen(true); }}
                   >
-                    <td className="px-4 py-6 text-[12px] text-gray-300 font-mono italic">#{r.reservationId}</td>
+                    <td className="px-4 py-6 text-[14px] text-gray-500 font-medium italic">#{r.reservationId}</td>
                     <td className="px-4 py-6 text-sm font-medium text-gray-500">{r.reservationDate}</td>
                     <td className="px-4 py-6 text-base font-black text-black tracking-tight group-hover:underline underline-offset-4 decoration-gray-200">{r.themeName}</td>
-                    <td className="px-4 py-6 text-sm font-bold text-gray-400 font-mono tracking-tighter">
-                      {r.startTime} <span className="mx-1 text-gray-200">|</span> {calcEndTime(r.startTime)}
+                    <td className="px-4 py-6 text-sm font-bold text-gray-500 font-mono tracking-tighter">
+                      {r.startTime} <span className="mx-1 text-gray-500">|</span> {calcEndTime(r.startTime)}
                     </td>
                     <td className="px-4 py-6 text-base font-black text-gray-800">{r.customerName}</td>
                     <td className="px-4 py-6 text-sm font-medium text-gray-400 font-mono">{r.customerPhone}</td>
