@@ -47,30 +47,19 @@ export default function NoticeAboutPage() {
     <div className="relative min-h-screen bg-white">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      {/* 상단 메뉴 버튼 */}
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
-            ${menuOpen ? "ml-[350px]" : "ml-0"}`}
-        >
-          <svg
-            className="w-12 h-12 text-gray-900"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={3}
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 5h16M4 12h16M4 19h16"
-            />
-          </svg>
-          <span className="font-[1000] text-gray-900 text-4xl mb-1">
-            MENU
-          </span>
-        </button>
+      {/* FIXED HEADER: 유지 */}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 px-6">
+        <div className={`transition-all duration-500 py-[13px] px-6 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] flex items-center max-w-[1400px] w-full
+          ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
+          <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center space-x-4 group">
+            <div className="flex flex-col space-y-1.5">
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "rotate-45 translate-y-2.5" : ""}`}></span>
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "opacity-0" : ""}`}></span>
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "-rotate-45 -translate-y-2.5" : ""}`}></span>
+            </div>
+            <span className="font-black text-gray-900 text-4xl tracking-tighter">MENU</span>
+          </button>
+        </div>
       </header>
 
       {/* 전체 컨텐츠 */}

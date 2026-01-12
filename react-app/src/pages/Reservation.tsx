@@ -62,24 +62,19 @@ export default function ThemePage(): JSX.Element {
     <div className="relative min-h-screen bg-neutral-50 text-black font-sans">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      {/* 헤더: 기존 유지 */}
-      <header className="fixed top-0 left-0 z-50 w-full flex justify-center pt-6 mt-9">
-        <button
-          onClick={() => setMenuOpen((p) => !p)}
-          className={`
-            max-w-[1400px] w-full
-            flex items-center space-x-3
-            py-[13px] px-5
-            bg-white rounded-lg shadow-all-xl
-            transition-all duration-300
-            ${menuOpen ? "ml-[350px]" : "ml-0"}
-          `}
-        >
-          <svg className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16" />
-          </svg>
-          <span className="text-4xl font-[1000]">MENU</span>
-        </button>
+      {/* FIXED HEADER: 유지 */}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 px-6">
+        <div className={`transition-all duration-500 py-[13px] px-6 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] flex items-center max-w-[1400px] w-full
+          ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
+          <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center space-x-4 group">
+            <div className="flex flex-col space-y-1.5">
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "rotate-45 translate-y-2.5" : ""}`}></span>
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "opacity-0" : ""}`}></span>
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "-rotate-45 -translate-y-2.5" : ""}`}></span>
+            </div>
+            <span className="font-black text-gray-900 text-4xl tracking-tighter">MENU</span>
+          </button>
+        </div>
       </header>
 
       <main className={`transition-all duration-300 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
@@ -209,10 +204,10 @@ export default function ThemePage(): JSX.Element {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500 bg-white">
+      <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
         <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
         <p className="mt-3">PRIVATE UI CLONE</p>
-        <p className="mt-3 text-zinc-400">Tel: 010 1234 5678</p>
+        <p className="mt-3">Tel: 010 1234 5678</p>
       </footer>
     </div>
   );

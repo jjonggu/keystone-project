@@ -8,4 +8,5 @@ export interface Reservation {
   customerPhone: string;
   headCount: number;
   reservationStatus: string;
+  refundStatus?: "PENDING" | "COMPLETED";
 }

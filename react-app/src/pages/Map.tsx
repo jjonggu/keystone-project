@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Menubar from "../components/ui/Menubar";
 import KakaoMap from "../components/map/KakaoMap";
-import { FaRocket, FaMapMarkerAlt, FaClock, FaSubway, FaPhone } from "react-icons/fa";
+import { FaRocket, FaMapMarkerAlt, FaClock, FaSubway, FaPhone, FaArrowRight } from "react-icons/fa";
 
 interface MapLocation {
   mapId: number;
@@ -15,11 +15,8 @@ interface MapLocation {
 export default function MapPage() {
   const { id } = useParams();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // DB에서 가져온 지도 데이터
   const [mapData, setMapData] = useState<MapLocation | null>(null);
 
-  // 페이지 로드시 DB에서 좌표
   useEffect(() => {
     fetch("/api/map")
       .then((res) => res.json())
@@ -31,120 +28,133 @@ export default function MapPage() {
       .catch((err) => console.error("지도 데이터 불러오기 오류:", err));
   }, []);
 
-  if (!mapData) return <div className="text-center mt-44 text-2xl">지도 불러오는 중...</div>;
+  if (!mapData) return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
-      <div className="relative min-h-screen bg-neutral-100 font-sans">
-        <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+    <div className="min-h-screen bg-[#F8F8F8] font-sans overflow-x-hidden">
+      <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-        {/* 헤더: 기존 유지 */}
-        <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className={`transition-all duration-300 py-[13px] px-5 bg-white rounded-lg shadow-all-xl flex items-center justify-start space-x-3 max-w-[1400px] w-full
-              ${menuOpen ? "ml-[350px]" : "ml-0"}`}
-          >
-            <svg className="w-12 h-12 text-gray-900" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M4 12h16M4 19h16" />
-            </svg>
-            <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
+      {/* FIXED HEADER: 유지 */}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9 px-6">
+        <div className={`transition-all duration-500 py-[13px] px-6 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] flex items-center max-w-[1400px] w-full
+          ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
+          <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center space-x-4 group">
+            <div className="flex flex-col space-y-1.5">
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "rotate-45 translate-y-2.5" : ""}`}></span>
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "opacity-0" : ""}`}></span>
+              <span className={`h-1 w-8 bg-black transition-all ${menuOpen ? "-rotate-45 -translate-y-2.5" : ""}`}></span>
+            </div>
+            <span className="font-black text-gray-900 text-4xl tracking-tighter">MENU</span>
           </button>
-        </header>
+        </div>
+      </header>
 
-        <div className={`min-h-screen flex justify-center transition-all duration-300 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
-          <div className="w-full max-w-[1400px] mt-60 px-6">
+      <main className={`transition-all duration-500 pt-[220px] pb-40 px-6 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
+        <div className="max-w-[1400px] mx-auto mt-[-40px]">
 
-            {/* 콘텐츠 영역 레이아웃 */}
-            <div className="flex flex-col lg:flex-row gap-8 w-full h-auto lg:h-[700px] mb-20">
+          {/* CONTENT GRID */}
+          <div className="grid lg:grid-cols-12 gap-6 items-stretch">
 
-              {/* 왼쪽 안내 섹션 */}
-              <div className="w-full lg:w-[35%] bg-white rounded-[2.5rem] shadow-2xl p-10 md:p-14 flex flex-col justify-between border border-white">
-                <div>
-                  <div className="inline-block px-4 py-1.5 bg-zinc-900 text-white text-[10px] font-bold tracking-[0.3em] rounded-full mb-6">
-                    LOCATION
-                  </div>
-                  <h2 className="text-5xl font-black text-gray-900 tracking-tighter mb-12">오시는 길</h2>
+            {/* LEFT: INFO CARD (4 columns) */}
+            <div className="lg:col-span-4 bg-white rounded-[3rem] p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] border border-white flex flex-col justify-between overflow-hidden relative">
+              <div className="relative z-10">
+                <div className="space-y-12">
+                  {/* Item: Address */}
+                  <section>
+                    <div className="flex items-center gap-3 mb-4 text-zinc-300">
+                      <FaMapMarkerAlt />
+                      <span className="text-[10px] font-black tracking-widest uppercase">Location Address</span>
+                    </div>
+                    <p className="text-2xl font-black text-black leading-tight break-keep">
+                      {mapData.address}
+                    </p>
+                    <p className="text-zinc-400 text-sm mt-3 font-medium">강남역과 신논현역 사이, 가장 핫한 골목에 위치합니다.</p>
+                  </section>
 
-                  <div className="space-y-10">
-                    {/* 주소 */}
-                    <div className="flex gap-5">
-                      <div className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center shrink-0">
-                        <FaMapMarkerAlt className="text-xl text-black" />
+                  {/* Item: Hours */}
+                  <section>
+                    <div className="flex items-center gap-3 mb-4 text-zinc-300">
+                      <FaClock />
+                      <span className="text-[10px] font-black tracking-widest uppercase">Business Hours</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center bg-zinc-50 p-4 rounded-2xl">
+                        <span className="font-bold text-sm">평일</span>
+                        <span className="font-black text-lg font-mono">08:00 - 24:00</span>
                       </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-1">Address</h3>
-                        <p className="text-gray-900 text-xl font-bold leading-snug">{mapData.address}</p>
-                        <p className="text-zinc-500 text-sm mt-1">신논현역 인근 지점입니다.</p>
+                      <div className="flex justify-between items-center bg-red-50 p-4 rounded-2xl text-red-600">
+                        <span className="font-bold text-sm">주말/공휴일</span>
+                        <span className="font-black text-lg font-mono">08:00 - 24:30</span>
                       </div>
                     </div>
+                  </section>
 
-                    {/* 영업시간 */}
-                    <div className="flex gap-5">
-                      <div className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center shrink-0">
-                        <FaClock className="text-xl text-black" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-1">Business Hours</h3>
-                        <div className="space-y-1 text-gray-900 font-bold text-lg">
-                          <p className="flex justify-between w-48 italic"><span>평일</span> <span>08:00 - 24:00</span></p>
-                          <p className="flex justify-between w-48 italic text-red-600"><span>주말/공휴</span> <span>08:00 - 24:30</span></p>
-                        </div>
-                      </div>
+                  {/* Item: Subway */}
+                  <section>
+                    <div className="flex items-center gap-3 mb-4 text-zinc-300">
+                      <FaSubway />
+                      <span className="text-[10px] font-black tracking-widest uppercase">By Subway</span>
                     </div>
-
-                    {/* 교통수단 */}
-                    <div className="flex gap-5">
-                      <div className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center shrink-0">
-                        <FaSubway className="text-xl text-black" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-1">Subway</h3>
-                        <p className="text-gray-700 text-md font-medium leading-relaxed">
-                          신논현역 <span className="text-black font-bold">4, 5, 6번 출구</span> 근처에 위치해 있습니다. 신분당선과 9호선을 이용해 주세요.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 하단 전화문의 (선택사항) */}
-                <div className="mt-12 pt-8 border-t border-neutral-100 flex items-center justify-between text-zinc-400">
-                  <span className="text-xs font-bold tracking-widest uppercase font-mono">문의</span>
-                  <span className="text-sm font-black text-black">010.1234.5678</span>
+                    <p className="text-gray-600 font-bold leading-relaxed">
+                      9호선/신분당선 <span className="text-black border-b-2 border-yellow-400">신논현역 4번 출구</span> 도보 3분
+                    </p>
+                  </section>
                 </div>
               </div>
 
-              {/* 오른쪽 지도 섹션 */}
-              <div className="w-full lg:w-[65%] rounded-[2.5rem] shadow-2xl overflow-hidden bg-neutral-200 h-[500px] lg:h-full relative group border-8 border-white">
-                <KakaoMap lat={mapData.latitude} lng={mapData.longitude} />
-                {/* 지도 위 오버레이 (디자인 포인트) */}
-                <div className="absolute top-6 right-6 bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow-lg pointer-events-none">
-                  <p className="text-[10px] font-black tracking-widest text-black">INTERACTIVE MAP</p>
+              {/* Contact Footer */}
+              <div className="mt-16 pt-8 border-t border-zinc-100 flex justify-between items-center">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black text-zinc-300 uppercase tracking-widest">Reservation Call</span>
+                  <span className="text-xl font-black text-black tracking-tighter font-mono">010.1234.5678</span>
+                </div>
+                <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white transition-transform hover:rotate-45 cursor-pointer">
+                  <FaPhone />
                 </div>
               </div>
             </div>
+
+            {/* RIGHT: MAP SECTION (8 columns) */}
+            <div className="lg:col-span-8 h-[600px] lg:h-auto min-h-[500px] rounded-[3rem] overflow-hidden shadow-2xl relative border-[12px] border-white ring-1 ring-zinc-100">
+              <KakaoMap lat={mapData.latitude} lng={mapData.longitude} />
+
+              {/* Map Floating Info */}
+              <div className="absolute top-8 left-8 bg-black text-white p-6 rounded-3xl shadow-2xl max-w-[240px]">
+                <p className="text-[9px] font-bold tracking-[0.3em] opacity-50 uppercase mb-2">Target Point</p>
+                <p className="text-lg font-black leading-tight tracking-tight uppercase">Keystone Escape <br/>Gangnam Center</p>
+                <div className="mt-4 flex items-center text-[10px] font-black text-yellow-400 group cursor-pointer">
+                  길 찾기 바로가기 <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+      </main>
 
-        {/* QUICK RESERVATION: 기존 유지 */}
-        <div className="fixed bottom-8 right-8 z-50">
-          <button
-            onClick={() => (window.location.href = "/reservation")}
-            className="w-36 h-36 rounded-full bg-black text-white font-bold text-lg shadow-2xl
-                       flex flex-col items-center justify-center
-                       transition-all duration-300 hover:scale-110 active:scale-95 group"
-          >
-            <FaRocket className="text-4xl mb-2 animate-bounce group-hover:text-yellow-400 transition-colors" />
-            빠른 예약
-          </button>
-        </div>
-
-        {/* Footer */}
-        <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500 bg-white">
-          <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
-          <p className="mt-3">PRIVATE UI CLONE</p>
-          <p className="mt-3 text-zinc-400">Tel: 010 1234 5678</p>
-        </footer>
+      {/* QUICK RESERVATION */}
+      <div className="fixed bottom-10 right-10 z-50">
+        <button
+          onClick={() => (window.location.href = "/reservation")}
+          className="w-32 h-32 rounded-full bg-black text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)]
+                     flex flex-col items-center justify-center border-4 border-white
+                     transition-all duration-300 hover:scale-110 active:scale-95 group"
+        >
+          <FaRocket className="text-3xl mb-1 animate-bounce group-hover:text-yellow-400 transition-colors" />
+          <span className="text-[10px] font-black tracking-widest uppercase italic">Reserve</span>
+        </button>
       </div>
-    );
-  }
+
+      {/* Footer */}
+      <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
+        <p>KEYSTONE GANGNAM ESCAPE ROOM</p>
+        <p className="mt-3">PRIVATE UI CLONE</p>
+        <p className="mt-3">Tel: 010 1234 5678</p>
+      </footer>
+    </div>
+  );
+}

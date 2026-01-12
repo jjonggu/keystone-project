@@ -1,6 +1,6 @@
 package com.keystonecape.controller;
 
-import com.keystonecape.dto.ReservationAdminDto;
+import com.keystonecape.dto.AdminReservation;
 import com.keystonecape.entity.Reservation;
 import com.keystonecape.entity.ReservationCancel;
 import com.keystonecape.repository.ReservationRepository;
@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,108 +28,142 @@ public class ReservationAdminController {
     private final ReservationRepository reservationRepository;
     private final ReservationCancelRepository cancelRepository;
 
-    // ===== 일반 예약 조회 =====
+    /**
+     * 1. 일반 예약 목록 조회 및 검색
+     */
     @GetMapping("/reservations")
-    public Page<ReservationAdminDto> getReservations(
+    public Page<AdminReservation> getReservations(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("reservationId").descending());
+        Page<Reservation> reservationPage;
 
-        return reservationRepository.findAll(pageable)
-                .map(r -> new ReservationAdminDto(
-                        r.getReservationId(),
-                        r.getReservationDate(),
-                        r.getTheme().getThemeName(),
-                        r.getTimeSlot().getStartTime().toString(),
-                        r.getTimeSlot().getEndTime().toString(),
-                        r.getCustomerName(),
-                        r.getCustomerPhone(),
-                        r.getHeadCount(),
-                        r.getReservationStatus(),
-                        "", // 일반 예약 은행 없음
-                        "", // 일반 예약 계좌 없음
-                        r.getCancelledAt()
-                ));
+        // 짧은 이름의 검색 메서드 호출
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            reservationPage = reservationRepository.searchReservations(keyword, pageable);
+        } else {
+            reservationPage = reservationRepository.findAll(pageable);
+        }
+
+        return reservationPage.map(this::convertToAdminReservation);
     }
 
-    // ===== 예약 상태 변경 및 수정 =====
+    /**
+     * 2. 취소 목록 조회 및 검색
+     */
+    @GetMapping("/reservations/cancelled")
+    public List<AdminReservation> getCancelledReservations(@RequestParam(required = false) String keyword) {
+        List<ReservationCancel> cancelledList;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            cancelledList = cancelRepository.searchCancelled(keyword);
+        } else {
+            cancelledList = cancelRepository.findAll(Sort.by("cancelledAt").descending());
+        }
+
+        return cancelledList.stream()
+                .map(this::convertToAdminReservationFromCancel)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 3. 업데이트 로직 (상태 변경 및 환불 관리)
+     */
     @PutMapping("/reservations/{id}")
     @Transactional
     public ResponseEntity<String> updateReservation(
             @PathVariable Long id,
             @RequestBody Map<String, Object> body
     ) {
+        // [A] 취소 테이블 환불 상태 업데이트
+        cancelRepository.findByReservationId(id).ifPresent(c -> {
+            if (body.containsKey("refundStatus")) {
+                c.setRefundStatus((String) body.get("refundStatus"));
+                cancelRepository.save(c);
+            }
+        });
+
+        // [B] 일반 예약 수정
         Optional<Reservation> optional = reservationRepository.findById(id);
         if (optional.isEmpty()) return ResponseEntity.notFound().build();
 
         Reservation r = optional.get();
-        boolean wasCancelled = "CANCELLED".equals(r.getReservationStatus());
+        boolean wasAlreadyCancelled = "CANCELLED".equals(r.getReservationStatus());
 
-        // 상태 변경 (취소 상태에서는 업데이트 막음)
-        if (body.containsKey("reservationStatus")) {
-            String newStatus = (String) body.get("reservationStatus");
-            if (!"CANCELLED".equals(r.getReservationStatus())) {
-                r.setReservationStatus(newStatus);
-            }
+        if (body.containsKey("reservationStatus") && !wasAlreadyCancelled) {
+            r.setReservationStatus((String) body.get("reservationStatus"));
         }
-
-        // 인원 변경
         if (body.containsKey("headCount")) {
-            Object head = body.get("headCount");
-            if (head instanceof Number) r.setHeadCount(((Number) head).intValue());
+            r.setHeadCount(((Number) body.get("headCount")).intValue());
         }
-
-        // 환불 정보 변경 (취소가 아닌 경우)
-        if (!"CANCELLED".equals(r.getReservationStatus())) {
-            if (body.containsKey("refundBank")) r.setRefundBank((String) body.get("refundBank"));
-            if (body.containsKey("refundAccount")) r.setRefundAccount((String) body.get("refundAccount"));
-        }
+        if (body.containsKey("refundBank")) r.setRefundBank((String) body.get("refundBank"));
+        if (body.containsKey("refundAccount")) r.setRefundAccount((String) body.get("refundAccount"));
 
         reservationRepository.save(r);
 
-        // CANCELLED 상태로 변경 시, 취소 테이블에 기록
-        if (!wasCancelled && "CANCELLED".equals(r.getReservationStatus())) {
-            ReservationCancel cancel = new ReservationCancel();
-            cancel.setReservationId(r.getReservationId());
-            cancel.setReservationDate(r.getReservationDate());
-            cancel.setThemeName(r.getTheme().getThemeName());
-            cancel.setStartTime(r.getTimeSlot().getStartTime());
-            cancel.setCustomerName(r.getCustomerName());
-            cancel.setCustomerPhone(r.getCustomerPhone());
-            cancel.setHeadCount(r.getHeadCount());
-            cancel.setReservationStatus("CANCELLED");
-
-            cancel.setPaymentType(r.getPaymentType() != null ? r.getPaymentType() : "");
-            cancel.setRefundBank(r.getRefundBank() != null ? r.getRefundBank() : "");
-            cancel.setRefundAccount(r.getRefundAccount() != null ? r.getRefundAccount() : "");
-            cancel.setCancelledAt(LocalDateTime.now());
-
-            cancelRepository.save(cancel);
+        // [C] 취소 데이터 생성 로직
+        if (!wasAlreadyCancelled && "CANCELLED".equals(r.getReservationStatus())) {
+            if (cancelRepository.findByReservationId(id).isEmpty()) {
+                cancelRepository.save(createCancelEntity(r));
+            }
         }
 
-        return ResponseEntity.ok("예약 업데이트 완료");
+        return ResponseEntity.ok("업데이트 완료");
     }
 
-    // ===== 취소 예약 목록 조회 =====
-    @GetMapping("/reservations/cancelled")
-    public List<ReservationAdminDto> getCancelledReservations() {
-        return cancelRepository.findAll()
-                .stream()
-                .map(c -> new ReservationAdminDto(
-                        c.getReservationId(),
-                        c.getReservationDate(),
-                        c.getThemeName(),
-                        c.getStartTime() != null ? c.getStartTime().toString() : "",
-                        c.getEndTime() != null ? c.getEndTime().toString() : "",
-                        c.getCustomerName(),
-                        c.getCustomerPhone(),
-                        c.getHeadCount(),
-                        c.getReservationStatus(),
-                        c.getRefundBank() != null ? c.getRefundBank() : "",
-                        c.getRefundAccount() != null ? c.getRefundAccount() : "",
-                        c.getCancelledAt()
-                ))
-                .collect(Collectors.toList());
+    // --- DTO 변환 및 엔티티 생성 헬퍼 메서드 ---
+
+    private AdminReservation convertToAdminReservation(Reservation r) {
+        return AdminReservation.builder()
+                .reservationId(r.getReservationId())
+                .reservationDate(r.getReservationDate())
+                .themeName(r.getTheme().getThemeName())
+                .startTime(r.getTimeSlot().getStartTime().toString())
+                .customerName(r.getCustomerName())
+                .customerPhone(r.getCustomerPhone())
+                .headCount(r.getHeadCount())
+                .reservationStatus(r.getReservationStatus())
+                .refundBank(r.getRefundBank() != null ? r.getRefundBank() : "")
+                .refundAccount(r.getRefundAccount() != null ? r.getRefundAccount() : "")
+                .cancelledAt(r.getCancelledAt())
+                .refundStatus("N/A")
+                .build();
+    }
+
+    private AdminReservation convertToAdminReservationFromCancel(ReservationCancel c) {
+        return AdminReservation.builder()
+                .reservationId(c.getReservationId())
+                .reservationDate(c.getReservationDate())
+                .themeName(c.getThemeName())
+                .startTime(c.getStartTime().toString())
+                .customerName(c.getCustomerName())
+                .customerPhone(c.getCustomerPhone())
+                .headCount(c.getHeadCount())
+                .reservationStatus(c.getReservationStatus())
+                .refundBank(c.getRefundBank())
+                .refundAccount(c.getRefundAccount())
+                .cancelledAt(c.getCancelledAt())
+                .refundStatus(c.getRefundStatus())
+                .build();
+    }
+
+    private ReservationCancel createCancelEntity(Reservation r) {
+        return ReservationCancel.builder()
+                .reservationId(r.getReservationId())
+                .reservationDate(r.getReservationDate())
+                .themeName(r.getTheme().getThemeName())
+                .startTime(r.getTimeSlot().getStartTime())
+                .customerName(r.getCustomerName())
+                .customerPhone(r.getCustomerPhone())
+                .headCount(r.getHeadCount())
+                .paymentType(r.getPaymentType() != null ? r.getPaymentType() : "NONE")
+                .refundBank(r.getRefundBank() != null ? r.getRefundBank() : "")
+                .refundAccount(r.getRefundAccount() != null ? r.getRefundAccount() : "")
+                .cancelledAt(LocalDateTime.now())
+                .refundStatus("PENDING")
+                .reservationStatus("CANCELLED")
+                .build();
     }
 }
