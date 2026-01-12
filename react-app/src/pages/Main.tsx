@@ -212,6 +212,7 @@ const scrollToThemes = () => {
         </div>
       </section>
 
+
       {/* Footer */}
       <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500">
         <p>KEYSTONE GANGNAM ESCAPE ROOM</p>

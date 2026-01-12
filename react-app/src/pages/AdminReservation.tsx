@@ -425,10 +425,16 @@ const AdminReservationPage: React.FC = () => {
         </div>
       )}
 
-      <div className="fixed bottom-8 right-8">
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="w-20 h-20 rounded-full bg-black text-white font-black flex flex-col items-center justify-center shadow-2xl hover:scale-110 transition active:scale-95 group">
-          <FaRocket className="text-2xl animate-bounce group-hover:text-yellow-400" />
-          <span className="text-[9px] mt-1 tracking-widest uppercase italic">Top</span>
+      {/* QUICK RESERVATION */}
+      <div className="fixed bottom-10 right-10 z-50">
+        <button
+          onClick={() => (window.location.href = "/reservation")}
+          className="w-32 h-32 rounded-full bg-black text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)]
+                     flex flex-col items-center justify-center border-4 border-white
+                     transition-all duration-300 hover:scale-110 active:scale-95 group"
+        >
+          <FaRocket className="text-3xl mb-1 animate-bounce group-hover:text-yellow-400 transition-colors" />
+          <span className="text-[10px] font-black tracking-widest uppercase italic">Reserve</span>
         </button>
       </div>
     </div>

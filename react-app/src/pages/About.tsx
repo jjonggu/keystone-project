@@ -377,15 +377,15 @@ export default function NoticeAboutPage() {
         </div>
       </div>
       {/* QUICK RESERVATION */}
-      <div className="fixed bottom-8 right-8 z-50">
+      <div className="fixed bottom-10 right-10 z-50">
         <button
           onClick={() => (window.location.href = "/reservation")}
-          className="w-36 h-36 rounded-full bg-black text-white font-bold text-lg shadow-2xl
-                     flex flex-col items-center justify-center
+          className="w-32 h-32 rounded-full bg-black text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)]
+                     flex flex-col items-center justify-center border-4 border-white
                      transition-all duration-300 hover:scale-110 active:scale-95 group"
         >
-          <FaRocket className="text-4xl mb-2 animate-bounce group-hover:text-yellow-400 transition-colors" />
-          빠른 예약
+          <FaRocket className="text-3xl mb-1 animate-bounce group-hover:text-yellow-400 transition-colors" />
+          <span className="text-[10px] font-black tracking-widest uppercase italic">Reserve</span>
         </button>
       </div>
     </div>
