@@ -308,15 +308,22 @@ export default function ConfirmPage() {
                     onChange={(e) => setRefundBank(e.target.value)}
                   />
 
-                  <input
-                    placeholder="계좌번호 (- 없이 입력)"
-                    className="w-full border-2 border-zinc-100 px-6 py-4 rounded-2xl text-lg focus:border-black focus:outline-none transition-all"
-                    value={refundAccount}
-                    inputMode="numeric"
-                    maxLength={20}
-                    onKeyDown={(e) => e.key === " " && e.preventDefault()}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                    <input
+                      placeholder="계좌번호 (- 없이 입력)"
+                      className="w-full border-2 border-zinc-100 px-6 py-4 rounded-2xl text-lg focus:border-black focus:outline-none transition-all"
+                      value={refundAccount}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={20}
+                      onKeyDown={(e) => {
+                        if (e.key === " ") e.preventDefault();
+                      }}
+                      onChange={(e) => {
+                        const onlyNumber = e.target.value.replace(/\D/g, "");
+                        setRefundAccount(onlyNumber);
+                      }}
+                    />
+
 
                   <button
                     onClick={saveRefundAccount}

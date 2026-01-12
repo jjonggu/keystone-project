@@ -40,7 +40,6 @@ public class ReservationAdminController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("reservationId").descending());
         Page<Reservation> reservationPage;
 
-        // 짧은 이름의 검색 메서드 호출
         if (keyword != null && !keyword.trim().isEmpty()) {
             reservationPage = reservationRepository.searchReservations(keyword, pageable);
         } else {
@@ -69,7 +68,7 @@ public class ReservationAdminController {
     }
 
     /**
-     * 3. 업데이트 로직 (상태 변경 및 환불 관리)
+     * 3. 업데이트 로직 (수정됨: 404 방지 및 취소 내역 우선 처리)
      */
     @PutMapping("/reservations/{id}")
     @Transactional
@@ -77,37 +76,53 @@ public class ReservationAdminController {
             @PathVariable Long id,
             @RequestBody Map<String, Object> body
     ) {
-        // [A] 취소 테이블 환불 상태 업데이트
-        cancelRepository.findByReservationId(id).ifPresent(c -> {
+        boolean isUpdated = false;
+
+        // [A] 취소 테이블 데이터 업데이트 (취소 탭에서 수정한 경우)
+        Optional<ReservationCancel> cancelOpt = cancelRepository.findByReservationId(id);
+        if (cancelOpt.isPresent()) {
+            ReservationCancel c = cancelOpt.get();
             if (body.containsKey("refundStatus")) {
                 c.setRefundStatus((String) body.get("refundStatus"));
-                cancelRepository.save(c);
             }
-        });
-
-        // [B] 일반 예약 수정
-        Optional<Reservation> optional = reservationRepository.findById(id);
-        if (optional.isEmpty()) return ResponseEntity.notFound().build();
-
-        Reservation r = optional.get();
-        boolean wasAlreadyCancelled = "CANCELLED".equals(r.getReservationStatus());
-
-        if (body.containsKey("reservationStatus") && !wasAlreadyCancelled) {
-            r.setReservationStatus((String) body.get("reservationStatus"));
+            cancelRepository.save(c);
+            isUpdated = true;
         }
-        if (body.containsKey("headCount")) {
-            r.setHeadCount(((Number) body.get("headCount")).intValue());
-        }
-        if (body.containsKey("refundBank")) r.setRefundBank((String) body.get("refundBank"));
-        if (body.containsKey("refundAccount")) r.setRefundAccount((String) body.get("refundAccount"));
 
-        reservationRepository.save(r);
+        // [B] 일반 예약 테이블 업데이트
+        Optional<Reservation> reservationOpt = reservationRepository.findById(id);
+        if (reservationOpt.isPresent()) {
+            Reservation r = reservationOpt.get();
+            boolean wasAlreadyCancelled = "CANCELLED".equals(r.getReservationStatus());
 
-        // [C] 취소 데이터 생성 로직
-        if (!wasAlreadyCancelled && "CANCELLED".equals(r.getReservationStatus())) {
-            if (cancelRepository.findByReservationId(id).isEmpty()) {
-                cancelRepository.save(createCancelEntity(r));
+            // 상태 변경 (이미 취소된 건은 상태 변경 불가)
+            if (body.containsKey("reservationStatus") && !wasAlreadyCancelled) {
+                r.setReservationStatus((String) body.get("reservationStatus"));
             }
+
+            // 인원 수정
+            if (body.containsKey("headCount")) {
+                r.setHeadCount(((Number) body.get("headCount")).intValue());
+            }
+
+            // 환불 계좌 정보 수정
+            if (body.containsKey("refundBank")) r.setRefundBank((String) body.get("refundBank"));
+            if (body.containsKey("refundAccount")) r.setRefundAccount((String) body.get("refundAccount"));
+
+            reservationRepository.save(r);
+            isUpdated = true;
+
+            // [C] 새로 취소 상태로 변경된 경우 취소 테이블에 데이터 생성
+            if (!wasAlreadyCancelled && "CANCELLED".equals(r.getReservationStatus())) {
+                if (cancelRepository.findByReservationId(id).isEmpty()) {
+                    cancelRepository.save(createCancelEntity(r));
+                }
+            }
+        }
+
+        // 둘 다 데이터가 없는 경우에만 404 반환
+        if (!isUpdated) {
+            return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.ok("업데이트 완료");
