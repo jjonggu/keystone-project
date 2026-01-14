@@ -4,6 +4,7 @@ import Menubar from "../components/ui/Menubar";
 import api from "../api";
 import type { Reservation } from "../types/reservation";
 import type { Notice, NoticeType, Faq } from "../types/notice";
+import { useAlert } from "../components/alert/AlertContext";
 
 // 상수 정의
 export const STATUS_MAP: Record<string, string> = {
@@ -46,6 +47,7 @@ const AdminReservationPage: React.FC = () => {
   const [noticeModalOpen, setNoticeModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const { showAlert } = useAlert();
 
   // 1. 초기 상태값 수정 (new_theme)
   const [newNotice, setNewNotice] = useState<Partial<Notice>>({
@@ -117,37 +119,44 @@ const AdminReservationPage: React.FC = () => {
         refundAccount: selectedReservation.refundAccount,
         refundStatus: selectedReservation.refundStatus,
       });
-      alert("성공적으로 업데이트되었습니다.");
-      setDetailModalOpen(false);
-      fetchReservations(page, activeStatus, activeKeyword);
-    } catch (err) {
-      alert("업데이트에 실패했습니다.");
-    }
-  };
+      showAlert("성공적으로 업데이트되었습니다.", "success", () => {
+              setDetailModalOpen(false);
+              fetchReservations(page, activeStatus, activeKeyword);
+            });
+          } catch (err) {
+            showAlert("업데이트에 실패했습니다.", "error");
+          }
+        };
 
   // 2. 저장 후 초기화 로직 수정 (new_theme)
   const handleSaveNotice = async () => {
     try {
       await api.post("/notice", newNotice);
-      alert("공지사항이 등록되었습니다.");
-      setNoticeModalOpen(false);
-      setNewNotice({
-        title: "",
-        content: "",
-        noticeType: "new_theme" as any,
-        noticeDate: new Date().toISOString().slice(0, 10)
-      });
-    } catch (err) { alert("등록 실패"); }
-  };
+      showAlert("공지사항이 등록되었습니다.", "success", () => {
+              setNoticeModalOpen(false);
+              setNewNotice({
+                title: "",
+                content: "",
+                noticeType: "new_theme" as any,
+                noticeDate: new Date().toISOString().slice(0, 10)
+              });
+            });
+          } catch (err) {
+            showAlert("공지사항 등록에 실패했습니다.", "error");
+          }
+        };
 
   const handleSaveFaq = async () => {
     try {
       await api.post("/faq", newFaq);
-      alert("FAQ가 등록되었습니다.");
-      setFaqModalOpen(false);
-      setNewFaq({ question: "", answer: "" });
-    } catch (err) { alert("등록 실패"); }
-  };
+      showAlert("FAQ가 등록되었습니다.", "success", () => {
+              setFaqModalOpen(false);
+              setNewFaq({ question: "", answer: "" });
+            });
+          } catch (err) {
+            showAlert("FAQ 등록에 실패했습니다.", "error");
+          }
+        };
 
   const isCancelledStatus = selectedReservation?.reservationStatus === "CANCELLED";
   const displayData = activeStatus === "CANCELLED" ? reservations : reservations.filter(r => r.reservationStatus === activeStatus);

@@ -8,38 +8,40 @@ import About from "../pages/About";
 import Notice from "../pages/Notice";
 import AdminReservation from "../pages/AdminReservation";
 import ScrollToTop from "../components/ui/ScrollToTop";
-
+import { AlertProvider } from "../components/alert/AlertContext";
 export default function AppRouter() {
   return (
-    <BrowserRouter>
-      {/* 페이지 이동 시 항상 최상단으로 */}
-      <ScrollToTop />
+      <AlertProvider>
+        <BrowserRouter>
+          {/* 페이지 이동 시 항상 최상단으로 */}
+          <ScrollToTop />
 
-      <Routes>
-        {/* 메인 / 테마 정보 페이지 */}
-        <Route path="/" element={<Main />} />
+          <Routes>
+            {/* 메인 / 테마 정보 페이지 */}
+            <Route path="/" element={<Main />} />
 
-        {/* 테마 예약 페이지 */}
-        <Route path="/reservation" element={<Reservation />} />
+            {/* 테마 예약 페이지 */}
+            <Route path="/reservation" element={<Reservation />} />
 
-        {/* 예약자 정보 입력 */}
-        <Route path="/reservation/form" element={<ReservationFormPage />} />
+            {/* 예약자 정보 입력 */}
+            <Route path="/reservation/form" element={<ReservationFormPage />} />
 
-        {/* 설명 */}
-        <Route path="/about" element={<About />} />
+            {/* 설명 */}
+            <Route path="/about" element={<About />} />
 
-        {/* 지도 */}
-        <Route path="/map" element={<Map />} />
+            {/* 지도 */}
+            <Route path="/map" element={<Map />} />
 
-        {/* 공지 / FAQ */}
-        <Route path="/notice" element={<Notice />} />
+            {/* 공지 / FAQ */}
+            <Route path="/notice" element={<Notice />} />
 
-        {/* 예약 관리자 페이지 */}
-        <Route path="/admin/reservations" element={<AdminReservation />} />
+            {/* 예약 관리자 페이지 */}
+            <Route path="/admin/reservations" element={<AdminReservation />} />
 
-        {/* 예약 확인 */}
-        <Route path="/confirm" element={<Confirm />} />
-      </Routes>
-    </BrowserRouter>
+            {/* 예약 확인 */}
+            <Route path="/confirm" element={<Confirm />} />
+          </Routes>
+        </BrowserRouter>
+      </AlertProvider>
   );
 }

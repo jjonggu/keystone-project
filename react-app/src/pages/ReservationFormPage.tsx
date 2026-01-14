@@ -6,7 +6,7 @@ import type { Theme } from "../types/theme";
 import type { TimeSlot } from "../types/timeSlot";
 import ReCAPTCHA from "react-google-recaptcha";
 import { FaUser, FaPhoneAlt, FaUsers, FaInfoCircle, FaCalendarAlt, FaClock } from "react-icons/fa";
-
+import { useAlert } from "../components/alert/AlertContext";
 interface LocationState {
   theme: Theme;
   date: string;
@@ -16,14 +16,12 @@ interface LocationState {
 export default function ReservationFormPage(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { showAlert } = useAlert();
   const [reservationState] = useState<LocationState | null>(
     location.state as LocationState | null
   );
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertType, setAlertType] = useState<"success" | "error">("success");
 
   if (!reservationState) {
     return (
@@ -54,20 +52,17 @@ export default function ReservationFormPage(): JSX.Element {
 
   const submitReservation = async (): Promise<void> => {
     if (!name || name.length > 7) {
-      setAlertType("error");
-      setAlertMessage("이름은 한글 7자 이내로 입력해주세요.");
+      showAlert("이름은 한글 7자 이내로 입력해주세요.", "error");
       return;
     }
 
     if (!/^\d{1,15}$/.test(phone)) {
-      setAlertType("error");
-      setAlertMessage("전화번호는 숫자만 최대 15자리까지 입력 가능합니다.");
+      showAlert("전화번호는 숫자만 최대 15자리까지 입력 가능합니다.", "error");
       return;
     }
 
     if (!captchaToken) {
-      setAlertType("error");
-      setAlertMessage("로봇이 아님을 확인해주세요.");
+      showAlert("로봇이 아님을 확인해주세요.", "error");
       return;
     }
 
@@ -83,35 +78,19 @@ export default function ReservationFormPage(): JSX.Element {
         captchaToken,
       });
 
-      setAlertType("success");
-      setAlertMessage("예약이 완료되었습니다.");
-    } catch (error) {
+      showAlert("예약이 완료되었습니다.", "success", () => {
+              navigate("/");
+            });
+          } catch (error) {
       console.error(error);
-      setAlertType("error");
-      setAlertMessage("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
+      showAlert("예약 중 오류가 발생했습니다. 다시 시도해주세요.", "error");
     }
   };
-
-  useEffect(() => {
-    if (!alertMessage) return;
-
-    const blockKey = (e: KeyboardEvent) => {
-      if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    window.addEventListener("keydown", blockKey);
-    return () => window.removeEventListener("keydown", blockKey);
-  }, [alertMessage]);
 
   return (
     <div className="relative min-h-screen bg-neutral-100 font-sans">
       <Menubar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-
-      {/* 헤더 유지 */}
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
+       <header className="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 mt-9">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className={`
@@ -124,7 +103,7 @@ export default function ReservationFormPage(): JSX.Element {
           </svg>
           <span className="font-[1000] text-gray-900 text-4xl mb-1">MENU</span>
         </button>
-      </header>
+       </header>
 
       <main className={`transition-all duration-300 flex justify-center items-center py-40 px-6 ${menuOpen ? "ml-[350px]" : "ml-0"}`}>
         <div className="flex flex-col lg:flex-row w-full max-w-[1050px] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white mt-10">
@@ -252,30 +231,6 @@ export default function ReservationFormPage(): JSX.Element {
           </div>
         </div>
       </main>
-
-      {/* 알림 모달 - 스타일 유지 */}
-      {alertMessage && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
-          <div className="bg-white rounded-[2.5rem] p-10 w-full max-w-[400px] text-center shadow-2xl animate-in fade-in zoom-in duration-300 border border-zinc-100">
-            <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center text-2xl ${alertType === "success" ? "bg-zinc-900 text-white" : "bg-red-50 text-red-600"}`}>
-              {alertType === "success" ? "✓" : "!"}
-            </div>
-            <h3 className={`text-2xl font-black mb-2 tracking-tight ${alertType === "success" ? "text-black" : "text-red-600"}`}>
-              {alertType === "success" ? "알림" : "오류"}
-            </h3>
-            <p className="text-zinc-500 mb-8 font-medium leading-relaxed">{alertMessage}</p>
-            <button
-              onClick={() => {
-                setAlertMessage(null);
-                if (alertType === "success") navigate("/");
-              }}
-              className="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-zinc-800 transition-colors"
-            >
-              확인
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <footer className="border-t border-neutral-200 py-14 text-center text-[11px] tracking-widest text-neutral-500 bg-white">

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Menubar from "../components/ui/Menubar";
 import api from "../api";
 import { FaRocket, FaSearch, FaRegCalendarAlt, FaUser, FaPhoneAlt, FaTicketAlt } from "react-icons/fa";
-
+import { useAlert } from "../components/alert/AlertContext";
 
 interface Reservation {
   reservationId: number;
@@ -22,7 +22,7 @@ export default function ConfirmPage() {
   const [reservationId, setReservationId] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-
+  const { showAlert } = useAlert();
   const [reservation, setReservation] = useState<Reservation | null>(null);
 
   const [showCancelForm, setShowCancelForm] = useState(false);
@@ -31,28 +31,23 @@ export default function ConfirmPage() {
   const [refundBank, setRefundBank] = useState("");
   const [refundAccount, setRefundAccount] = useState("");
 
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertType, setAlertType] = useState<"success" | "error" | "confirm">("success");
   const [onConfirm, setOnConfirm] = useState<(() => void) | null>(null);
 
 
   const fetchReservation = async () => {
 
    if (!/^[가-힣]{1,7}$/.test(name)) {
-      setAlertType("error");
-      setAlertMessage("이름은 한글 7자 이내로 입력해주세요.");
+      showAlert("이름은 한글 7자 이내로 입력해주세요.", "error");
       return;
     }
 
     if (!/^\d{1,15}$/.test(phone)) {
-      setAlertType("error");
-      setAlertMessage("전화번호는 숫자만 최대 15자리입니다.");
+      showAlert("전화번호는 숫자만 최대 15자리입니다.", "error");
       return;
     }
 
     if (!/^\d{1,10}$/.test(reservationId)) {
-      setAlertType("error");
-      setAlertMessage("예약번호는 숫자만 최대 10자리입니다.");
+      showAlert("예약번호는 숫자만 최대 10자리입니다.", "error");
       return;
     }
 
@@ -68,17 +63,17 @@ export default function ConfirmPage() {
       });
       setReservation(res.data);
     } catch {
-      setAlertType("error");
-      setAlertMessage("예약 정보를 찾을 수 없습니다.");
+      showAlert("예약 정보를 찾을 수 없습니다.", "error");
       setReservation(null);
     }
   };
 
   const cancelReservation = async () => {
     if (!reservation) return;
-    setAlertType("confirm");
-        setAlertMessage("정말 예약을 취소하시겠습니까?");
-        setOnConfirm(() => async () => {
+    showAlert(
+        "정말 예약을 취소하시겠습니까?\n확인을 누르면 취소 단계로 진행됩니다.",
+        "success",
+        async () => {
           try {
             const res = await api.post(
               `/reservations/${reservation.reservationId}/cancel`
@@ -88,8 +83,7 @@ export default function ConfirmPage() {
             setShowCancelForm(true);
             setReservation(null);
           } catch {
-            setAlertType("error");
-            setAlertMessage("예약 취소 중 오류가 발생했습니다.");
+            showAlert("예약 취소 중 오류가 발생했습니다.", "error");
           }
         });
       };
@@ -98,20 +92,12 @@ export default function ConfirmPage() {
 
 
   if (!/^[가-힣]{1,7}$/.test(refundBank)) {
-      setAlertType("error");
-      setAlertMessage("은행명은 한글 7자 이내로 입력해주세요.");
+      showAlert("은행명은 한글 7자 이내로 입력해주세요.", "error");
       return;
     }
 
     if (!/^\d{1,20}$/.test(refundAccount)) {
-      setAlertType("error");
-      setAlertMessage("계좌번호는 숫자만 최대 20자리입니다.");
-      return;
-    }
-
-    if (!refundBank || !refundAccount) {
-      setAlertType("error");
-      setAlertMessage("환불 계좌 정보를 입력해주세요.");
+      showAlert("계좌번호는 숫자만 최대 20자리입니다.", "error");
       return;
     }
 
@@ -121,30 +107,28 @@ export default function ConfirmPage() {
         refundAccount,
       });
 
-      setAlertType("success");
-      setAlertMessage("예약 취소 및 환불 정보가 저장되었습니다.");
-      reset();
-    } catch {
-      setAlertType("error");
-      setAlertMessage("환불 계좌 저장 중 오류가 발생했습니다.");
-    }
-  };
+      showAlert("환불 정보가 저장되었습니다.", "success", () => {
+              reset();
+            });
+          } catch {
+            showAlert("환불 계좌 저장 중 오류가 발생했습니다.", "error");
+          }
+        };
 
-  const reset = () => {
-    setReservation(null);
-    setReservationId("");
-    setName("");
-    setPhone("");
-    setShowCancelForm(false);
-    setRefundBank("");
-    setRefundAccount("");
-    setCancelId(null);
-  };
+      const reset = () => {
+        setReservation(null);
+        setReservationId("");
+        setName("");
+        setPhone("");
+        setShowCancelForm(false);
+        setRefundBank("");
+        setRefundAccount("");
+        setCancelId(null);
+      };
 
 
   return (
       <div className="relative min-h-screen bg-[#f8f9fa] text-zinc-900 font-sans">
-        {/* 배경 장식 (휑함을 방지) */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-zinc-200/50 rounded-full blur-[120px]" />
           <div className="absolute bottom-[10%] right-[0%] w-[30%] h-[30%] bg-zinc-200/50 rounded-full blur-[100px]" />
@@ -337,49 +321,7 @@ export default function ConfirmPage() {
           </div>
         </main>
 
-        {/* 커스텀 알림 모달 */}
-        {alertMessage && (
-          <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAlertMessage(null)} />
-            <div className="relative bg-white rounded-[32px] p-10 w-full max-w-[400px] text-center shadow-2xl animate-in fade-in zoom-in duration-300">
-              <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center text-2xl ${
-                alertType === "error" ? "bg-red-100 text-red-600" : "bg-zinc-100 text-black"
-              }`}>
-                {alertType === "error" ? "!" : "✓"}
-              </div>
-              <h3 className="text-xl font-bold mb-2">
-                {alertType === "confirm" ? "정말 취소하시겠습니까?" : alertType === "error" ? "문제가 발생했습니다" : "알림"}
-              </h3>
-              <p className="text-zinc-500 mb-8 leading-relaxed">{alertMessage}</p>
-
-              {alertType === "confirm" ? (
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => { setAlertMessage(null); setOnConfirm(null); }}
-                    className="flex-1 py-4 bg-zinc-100 rounded-2xl font-bold hover:bg-zinc-200 transition-colors"
-                  >
-                    아니오
-                  </button>
-                  <button
-                    onClick={() => { onConfirm?.(); setAlertMessage(null); setOnConfirm(null); }}
-                    className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-colors"
-                  >
-                    네, 취소합니다
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setAlertMessage(null)}
-                  className="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-zinc-800 transition-colors"
-                >
-                  확인
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* QUICK RESERVATION: 기존 유지 */}
+        {/* QUICK RESERVATION*/}
         <div className="fixed bottom-8 right-8 z-50">
           <button
             onClick={() => (window.location.href = "/reservation")}
